@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend × Problem – Geschäftsideen Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #003063;
+    --blue-mid: #00509B;
+    --green: #C8D317;
+    --white: #ffffff;
+    --grey: #f4f5f0;
+    --text: #1a1a2e;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--white);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  header h1 span {
+    color: var(--green);
+  }
+
+  header p {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+
+  .cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .card {
+    border-radius: 16px;
+    padding: 28px 24px;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease;
+  }
+
+  .card-trend {
+    background: var(--blue-mid);
+    border: 2px solid rgba(200, 211, 23, 0.4);
+  }
+
+  .card-problem {
+    background: var(--white);
+    color: var(--text);
+    border: 2px solid rgba(0, 48, 99, 0.15);
+  }
+
+  .card-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+
+  .card-trend .card-label { color: var(--green); opacity: 1; }
+  .card-problem .card-label { color: var(--blue-mid); opacity: 1; }
+
+  .card-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    line-height: 1.25;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-trend .card-text { color: var(--white); }
+  .card-problem .card-text { color: var(--blue); }
+
+  .card-icon {
+    position: absolute;
+    right: 20px;
+    top: 24px;
+    font-size: 1.8rem;
+    opacity: 0.15;
+  }
+
+  /* flip animation */
+  .card.flipping .card-text {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .btn {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 420px;
+    background: var(--green);
+    color: var(--blue);
+    border: none;
+    border-radius: 14px;
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    box-shadow: 0 4px 20px rgba(200, 211, 23, 0.25);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+    box-shadow: none;
+  }
+
+  .btn:hover {
+    box-shadow: 0 6px 28px rgba(200, 211, 23, 0.4);
+  }
+
+  .instruction {
+    margin-top: 20px;
+    max-width: 420px;
+    text-align: center;
+    font-size: 0.82rem;
+    opacity: 0.5;
+    line-height: 1.6;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(200,211,23,0.15);
+    color: var(--green);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 0.7rem;
+    opacity: 0.25;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Entrepreneurship · LUH</div>
+  <h1>Trend <span>×</span> Problem</h1>
+  <p>Ziehe deine Kombination und entwickle eine Geschäftsidee</p>
+</header>
+
+<div class="cards-wrapper">
+  <div class="card card-trend" id="card-trend">
+    <div class="card-label">📈 Trend</div>
+    <div class="card-text" id="trend-text">Drücke den Button!</div>
+    <div class="card-icon">🌍</div>
+  </div>
+
+  <div class="card card-problem" id="card-problem">
+    <div class="card-label">⚠️ Problem</div>
+    <div class="card-text" id="problem-text">Deine Karte erscheint hier</div>
+    <div class="card-icon">💡</div>
+  </div>
+</div>
+
+<button class="btn" onclick="draw()">🎲 Neue Kombination ziehen</button>
+
+<p class="instruction">
+  Du hast <strong>10 Minuten</strong>. Entwickle mit deiner Partnerin / deinem Partner eine Geschäftsidee an der Schnittstelle dieser beiden Karten.
+</p>
+
+<footer>IME · Leibniz Universität Hannover</footer>
+
+<script>
+  const trends = [
+    "Digitalisierung & KI",
+    "Demografischer Wandel / Alterung",
+    "Klimawandel & Nachhaltigkeit",
+    "Inflation & Kaufkraftverlust",
+    "Urbanisierung",
+    "Globalisierung & Lieferkettenprobleme",
+    "Remote Work & New Work",
+    "Plattformisierung der Wirtschaft",
+    "Gesundheitsbewusstsein & Longevity",
+    "Geopolitische Unsicherheit / Deglobalisierung"
+  ];
+
+  const problems = [
+    "Einsamkeit & soziale Isolation",
+    "Lebensmittelverschwendung",
+    "Mangelnde Gesundheitsversorgung in ländlichen Gebieten",
+    "Psychische Gesundheit / Burnout",
+    "Wohnungsnot in Städten",
+    "Bürokratie & Verwaltungsaufwand für KMUs",
+    "Fehlende digitale Kompetenz älterer Menschen",
+    "Plastikverschmutzung & Abfallentsorgung",
+    "Altersarmut",
+    "Mangelnde Transparenz bei Lebensmittelherkunft & -qualität"
+  ];
+
+  const icons = ["🌍","🤖","🌱","💶","🏙️","🔗","💻","📱","❤️","⚡"];
+  const picons = ["🤝","🥗","🏥","🧠","🏠","📋","👴","♻️","💰","🔍"];
+
+  let lastTrend = -1;
+  let lastProblem = -1;
+
+  function pick(arr, last) {
+    let idx;
+    do { idx = Math.floor(Math.random() * arr.length); } while (idx === last);
+    return idx;
+  }
+
+  function draw() {
+    const tCard = document.getElementById('card-trend');
+    const pCard = document.getElementById('card-problem');
+    const tText = document.getElementById('trend-text');
+    const pText = document.getElementById('problem-text');
+
+    tCard.classList.add('flipping');
+    pCard.classList.add('flipping');
+
+    setTimeout(() => {
+      const ti = pick(trends, lastTrend);
+      const pi = pick(problems, lastProblem);
+      lastTrend = ti; lastProblem = pi;
+
+      tText.textContent = trends[ti];
+      pText.textContent = problems[pi];
+      tCard.querySelector('.card-icon').textContent = icons[ti];
+      pCard.querySelector('.card-icon').textContent = picons[pi];
+
+      tCard.classList.remove('flipping');
+      pCard.classList.remove('flipping');
+    }, 220);
+  }
+
+  // draw on load
+  draw();
+</script>
+</body>
+</html>
