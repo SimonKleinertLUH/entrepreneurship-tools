@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wie ist Ihre unternehmerische Logik?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    min-height:100vh;
+    background:linear-gradient(170deg,#06101e 0%,#0c1a2e 40%,#112035 100%);
+    font-family:Georgia,'Palatino Linotype',serif;
+    color:#d0dae8;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:48px 28px 80px}
+  .hidden{display:none!important}
+
+  @keyframes slideIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes cardFlip{0%{transform:perspective(800px) rotateX(0)}40%{transform:perspective(800px) rotateX(90deg)}60%{transform:perspective(800px) rotateX(90deg)}100%{transform:perspective(800px) rotateX(0)}}
+  @keyframes bounce{0%{transform:scale(1)}30%{transform:scale(.97)}60%{transform:scale(1.015)}100%{transform:scale(1)}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  @keyframes breathe{0%,100%{opacity:.4}50%{opacity:1}}
+
+  .fs-btn{
+    position:fixed;top:16px;right:16px;z-index:100;
+    font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+    color:#3d5a80;background:rgba(10,20,34,.8);border:1px solid #1e3050;
+    padding:8px 14px;border-radius:6px;cursor:pointer;
+    backdrop-filter:blur(8px);transition:all .3s;
+  }
+  .fs-btn:hover{color:#8a9bba;border-color:#3a5580}
+
+  /* INTRO */
+  .intro-el{opacity:0;transform:translateY(20px);transition:all .6s ease}
+  .intro-el.show{opacity:1;transform:translateY(0)}
+  .intro-badge{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d5a80;margin-bottom:28px}
+  .intro-title{font-family:'Fraunces',Georgia,serif;font-size:44px;font-weight:900;line-height:1.1;color:#fff;margin-bottom:8px}
+  .intro-line{width:64px;height:3px;margin:22px 0 28px;background:linear-gradient(90deg,#4A6FA5,#6B8F71,#C17817);border-radius:3px;transform:scaleX(0);transform-origin:left;transition:transform .6s ease .15s}
+  .intro-line.show{transform:scaleX(1)}
+  .intro-desc{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7;color:#6b85a5;max-width:520px;margin-bottom:12px}
+  .intro-hint{font-family:'DM Sans',sans-serif;font-size:13px;color:#3d5a80;margin-bottom:40px}
+  .intro-btn{
+    font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+    color:#fff;background:linear-gradient(135deg,#4A6FA5,#5a80b5,#6B8F71);
+    background-size:200% 200%;border:none;padding:16px 48px;
+    border-radius:8px;cursor:pointer;letter-spacing:.5px;transition:box-shadow .3s,transform .3s;
+  }
+  .intro-btn.show{animation:shimmer 5s ease infinite}
+  .intro-btn:hover{box-shadow:0 8px 36px rgba(74,111,165,.45);transform:translateY(-3px)}
+
+  /* PROGRESS */
+  .prog{display:flex;gap:5px;margin-bottom:36px}
+  .seg{flex:1;height:4px;border-radius:4px;background:#0f1c2e;overflow:hidden}
+  .segfill{height:100%;border-radius:4px;transition:width .7s cubic-bezier(.22,1,.36,1)}
+
+  /* CARDS */
+  .card{
+    position:relative;background:#0a1422;border:1.5px solid #162236;
+    border-radius:10px;padding:20px 22px;margin-bottom:12px;
+    cursor:pointer;font-family:'DM Sans',sans-serif;
+    font-size:14.5px;line-height:1.6;color:#8a9cb5;
+    transition:border-color .3s,background .3s,transform .3s,padding-top .3s;
+    overflow:hidden;
+  }
+  .card:hover:not(.locked){border-color:#253a58;background:#0d1928;transform:translateX(3px)}
+  .card.sel{border-color:#4A6FA5;background:#0f1f36;color:#c8d5e5}
+  .card.locked{cursor:default}
+  .card.flipping{animation:cardFlip .65s ease}
+  .card.pulse{animation:bounce .4s ease}
+
+  .card-stripe{position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:transparent;transition:background .3s}
+  .card.sel .card-stripe{background:#4A6FA5}
+
+  .letter{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    font-size:12px;font-weight:700;margin-right:14px;
+    border:1.5px solid #1e3050;color:#4a6888;transition:all .3s;
+  }
+  .card.sel .letter{background:#4A6FA5;border-color:#4A6FA5;color:#fff}
+
+  .banner{
+    position:absolute;top:0;left:0;right:0;padding:8px 22px;
+    font-family:'DM Sans',sans-serif;font-size:10px;font-weight:800;
+    letter-spacing:2px;text-transform:uppercase;color:#fff;
+    border-radius:9px 9px 0 0;opacity:0;transform:translateY(-100%);
+    transition:opacity .35s,transform .35s;
+  }
+  .banner.show{opacity:1;transform:translateY(0)}
+
+  .explain{
+    overflow:hidden;max-height:0;opacity:0;
+    transition:max-height .5s ease .15s,opacity .4s ease .25s,margin-top .5s,padding-top .5s;
+    font-size:13px;color:#5a7a99;line-height:1.55;font-style:italic;
+  }
+  .explain.show{max-height:140px;opacity:1;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.04)}
+
+  .card-row{display:flex;align-items:flex-start}
+
+  /* BUTTONS */
+  .action-bar{margin-top:28px;display:flex;justify-content:flex-end}
+  .btn{
+    font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+    padding:13px 32px;border:none;border-radius:8px;cursor:pointer;
+    transition:all .3s;letter-spacing:.3px;
+  }
+  .btn:disabled{opacity:.2;cursor:not-allowed}
+  .btn-primary{background:#4A6FA5;color:#fff}
+  .btn-primary:hover:not(:disabled){background:#5680b8;transform:translateY(-2px);box-shadow:0 6px 24px rgba(74,111,165,.35)}
+  .btn-go{background:#6B8F71;color:#fff}
+  .btn-go:hover{background:#7da384;transform:translateY(-2px);box-shadow:0 6px 24px rgba(107,143,113,.35)}
+
+  /* RESULTS */
+  .brow{display:flex;align-items:center;gap:14px;margin-bottom:14px;opacity:0;transform:translateY(14px);transition:all .5s ease}
+  .brow.show{opacity:1;transform:translateY(0)}
+  .blabel{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;width:140px;text-align:right;color:#7b8faa;flex-shrink:0}
+  .btrack{flex:1;height:34px;background:#0a1422;border-radius:8px;overflow:hidden;border:1px solid #162236}
+  .bfill{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:12px;width:0;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+  .bcount{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;color:#fff}
+
+  .profile-card{
+    background:#0a1422;border:1px solid #162236;border-radius:12px;
+    padding:32px;margin-top:36px;opacity:0;transform:scale(.92) translateY(16px);
+    transition:all .6s cubic-bezier(.22,1,.36,1);
+  }
+  .profile-card.show{opacity:1;transform:scale(1) translateY(0)}
+
+  .restart-btn{
+    margin-top:28px;font-family:'DM Sans',sans-serif;font-size:13px;
+    font-weight:500;color:#3d5a80;background:transparent;
+    border:1px solid #1e3050;padding:11px 24px;border-radius:8px;
+    cursor:pointer;transition:all .3s;opacity:0;
+  }
+  .restart-btn.show{opacity:1}
+  .restart-btn:hover{color:#7b8faa;border-color:#3a5580;background:#0d1825}
+
+  .counter-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#3d5a80;margin-bottom:14px}
+  .scene-text{font-size:21px;line-height:1.45;color:#e8edf4;margin-bottom:32px;padding-bottom:26px;border-bottom:1px solid #162236}
+  .prompt{font-family:'DM Sans',sans-serif;font-size:13px;color:#3d5a80;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .prompt-dot{width:7px;height:7px;border-radius:50%;background:#4A6FA5;animation:breathe 2s ease infinite}
+  .res-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d5a80;margin-bottom:16px}
+  .res-title{font-family:'Fraunces',Georgia,serif;font-size:40px;font-weight:900;color:#fff;margin:0 0 6px}
+  .res-sub{font-family:'DM Sans',sans-serif;font-size:14px;color:#4a6888;margin-bottom:40px}
+</style>
+</head>
+<body>
+
+<button class="fs-btn" id="fsBtn" onclick="toggleFS()">Vollbild</button>
+
+<div class="wrap">
+  <div id="intro">
+    <div class="intro-badge intro-el" id="a1">Vorlesung 02 &mdash; Interaktive &Uuml;bung</div>
+    <h1 class="intro-title intro-el" id="a2">Wie ist Ihre<br>unternehmerische Logik?</h1>
+    <div class="intro-line intro-el" id="a3"></div>
+    <p class="intro-desc intro-el" id="a4">Sechs unternehmerische Situationen. Drei Handlungsoptionen. Keine richtige Antwort &mdash; aber jede verr&auml;t etwas &uuml;ber eure unternehmerische Logik.</p>
+    <p class="intro-hint intro-el" id="a5">W&auml;hlt die Option, die ihr selbst w&auml;hlen w&uuml;rdet. Am Ende seht ihr euer Logik-Profil.</p>
+    <button class="intro-btn intro-el" id="a6" onclick="startGame()">Spiel starten &rarr;</button>
+  </div>
+  <div id="game" class="hidden"></div>
+  <div id="result" class="hidden"></div>
+</div>
+
+<script>
+var DATA = [
+  {
+    s: "Euer Lieferant f\u00FCr pflanzliche Patties springt drei Wochen vor dem geplanten Soft-Opening ab.",
+    o: [
+      {t:"Ihr recherchiert systematisch alternative Lieferanten, vergleicht Preise, Qualit\u00E4t und Lieferzeiten \u2014 und w\u00E4hlt den objektiv besten aus.", l:"Causation", p:"", e:"Zielorientierte Mittelsuche: Das Ziel (Patties) steht fest, ihr sucht systematisch das beste Mittel."},
+      {t:"Ihr ruft eure Kontakte durch \u2014 eine Freundin kennt einen Koch, der experimentelle Patties macht. Ihr testet morgen sein Rezept.", l:"Effectuation", p:"Crazy Quilt", e:"Stakeholder einbinden: Statt Marktanalyse nutzt ihr Netzwerke und lasst den neuen Partner das Ziel mitgestalten."},
+      {t:"Ihr kauft im Gro\u00DFmarkt Kichererbsen, Bohnen und Gew\u00FCrze und entwickelt \u00FCber Nacht ein eigenes Rezept aus dem, was verf\u00FCgbar ist.", l:"Bricolage", p:"Making Do", e:"Making Do: Statt ideale Ressourcen zu suchen, baut ihr mit dem, was jetzt greifbar ist."}
+    ]
+  },
+  {
+    s: "Ihr habt kein Budget f\u00FCr Marketing, aber in zwei Wochen ist Stadtfest mit 50.000 Besuchern.",
+    o: [
+      {t:"Ihr erstellt einen Marketingplan mit Zielgruppenanalyse, definiert KPIs und wartet auf ein kleines Budget aus dem n\u00E4chsten Monat.", l:"Causation", p:"", e:"Plangetrieben: Erst analysieren, dann budgetieren, dann handeln \u2014 klassische kausale Sequenz."},
+      {t:"Ihr zieht Gem\u00FCsekost\u00FCme an, baut einen Guerilla-Stand direkt am Festeingang und verteilt Gratisproben \u2014 am selben Abend noch organisiert.", l:"Hustle", p:"Dringlichkeit + Unorthodoxie", e:"Urgency + Unorthodoxie: Sofort handeln, unkonventionell, und die Gelegenheit im Moment ergreifen."},
+      {t:"Ihr bietet dem befreundeten Foodblogger freies Essen f\u00FCr ein Jahr an, wenn er euch auf dem Stadtfest live featured.", l:"Effectuation", p:"Affordable Loss + Crazy Quilt", e:"Affordable Loss + Crazy Quilt: Kalkulierter Einsatz (Essen statt Geld), Stakeholder wird zum Partner."}
+    ]
+  },
+  {
+    s: "Eure ersten zwei Wochen laufen \u2014 aber die Burger verkaufen sich schlecht. Daf\u00FCr fragen st\u00E4ndig Leute nach euren Beilagen.",
+    o: [
+      {t:"Ihr haltet am Businessplan fest \u2014 der Burger ist euer Kernprodukt. Ihr optimiert Rezeptur, senkt den Preis und schaltet gezielte Werbung.", l:"Causation", p:"", e:"Ziel beibehalten, Mittel anpassen: Das definierte Ziel (Burger-Restaurant) bleibt, die Umsetzung wird optimiert."},
+      {t:"Ihr pivotiert: Ab n\u00E4chster Woche seid ihr ein Bowl-und-Sides-Konzept. Der Markt hat euch gezeigt, was er will.", l:"Effectuation", p:"Lemonade Principle", e:"Lemonade Principle: Die \u00DCberraschung wird zur neuen Chance \u2014 das Ziel ver\u00E4ndert sich mit dem Feedback."},
+      {t:"Ihr nehmt die Beilagen, die ihr schon habt, kombiniert sie zu drei Signature Bowls aus exakt den Zutaten auf eurem aktuellen Lager.", l:"Bricolage", p:"Combination of Resources", e:"Ressourcen neu kombinieren: Kein neues Material, sondern kreatives Rearrangement des Vorhandenen."}
+    ]
+  },
+  {
+    s: "Ein lokaler Investor bietet euch 50.000 \u20AC \u2014 aber will 40% Anteile und Mitsprache beim Men\u00FC.",
+    o: [
+      {t:"Ihr erstellt eine systematische Unternehmensbewertung, verhandelt auf Basis der Zahlen und akzeptiert nur bei markt\u00FCblichen Konditionen.", l:"Causation", p:"", e:"Analytische Entscheidung: Ziel (optimale Bewertung) steht fest, Mittel (Verhandlung auf Datenbasis) werden systematisch gew\u00E4hlt."},
+      {t:"Ihr lehnt ab, finanziert euch aus dem Cashflow und bietet dem Investor stattdessen an, als zahlender Catering-Kunde einzusteigen.", l:"Effectuation", p:"Affordable Loss + Pilot-in-the-Plane", e:"Affordable Loss: 40% Kontrolle \u00FCbersteigt den akzeptablen Verlust. Pilot-in-the-Plane: Ihr gestaltet die Beziehung selbst um."},
+      {t:"Ihr nehmt das Geld nicht, aber \u00FCberzeugt den Investor, euch seinen leerstehenden Keller als Pop-up-Fl\u00E4che kostenlos zu \u00FCberlassen.", l:"Bricolage", p:"Resources at Hand", e:"Ressource neu sehen: Der Investor wird nicht als Geldquelle, sondern als Zugang zu einem \u00FCbersehenen Asset genutzt."}
+    ]
+  },
+  {
+    s: "Euer Hauptkonkurrent \u2014 eine gro\u00DFe Kette \u2014 er\u00F6ffnet 200 Meter weiter eine vegane Linie. Eure Laufkundschaft bricht ein.",
+    o: [
+      {t:"Ihr analysiert deren Angebot, identifiziert Differenzierungspotenziale und repositioniert euch mit einer klaren Nischenstrategie.", l:"Causation", p:"", e:"Wettbewerbsanalyse, Strategie, Umsetzung: Klassische kausale Sequenz mit Zielorientierung."},
+      {t:"Ihr geht am selben Abend mit einem Support-your-Local-Event live, kocht vor der T\u00FCr, erz\u00E4hlt eure Geschichte und baut Stammkundenbindung.", l:"Hustle", p:"Dringlichkeit + Kontextreaktivit\u00E4t", e:"Dringlichkeit + Kontextreaktivit\u00E4t: Sofortige Reaktion auf die Bedrohung, unkonventionell, mit Signalwirkung."},
+      {t:"Ihr ruft f\u00FCnf befreundete Gastronomen an und gr\u00FCndet noch diese Woche eine Local Food Alliance mit gemeinsamen Events und Cross-Promotion.", l:"Effectuation", p:"Crazy Quilt", e:"Crazy Quilt: Neue Partner einbinden, die eigene Mittel und Reichweite mitbringen \u2014 das Ziel entsteht aus der Kooperation."}
+    ]
+  },
+  {
+    s: "Die Stadt bietet euch kurzfristig einen Standplatz auf dem Weihnachtsmarkt an \u2014 aber ihr habt weder Equipment noch ein Wintermen\u00FC.",
+    o: [
+      {t:"Ihr lehnt ab \u2014 ohne Vorbereitung, Winterkarte und Equipment w\u00E4re das Risiko f\u00FCr die Marke zu hoch.", l:"Causation", p:"", e:"Risikovermeidung durch Planung: Ohne kalkulierbare Erfolgsaussicht wird die Gelegenheit verworfen."},
+      {t:"Ihr leiht euch den Gastro-Anh\u00E4nger eines Bekannten, macht aus drei Bestsellern eine Winter Edition mit Gl\u00FChwein und sagt sofort zu.", l:"Bricolage", p:"Making Do + Combination", e:"Making Do + Kombination: Geliehenes Equipment, vorhandene Rezepte, kreativ angepasst \u2014 handeln mit dem Unvollkommenen."},
+      {t:"Ihr sagt zu, obwohl nichts steht \u2014 postet sofort auf Instagram und organisiert alles in 72 Stunden.", l:"Hustle", p:"Dringlichkeit + Intendierter Nutzen", e:"Dringlichkeit: Erst committen, dann l\u00F6sen. Das \u00F6ffentliche Commitment erzeugt Zugzwang und Sichtbarkeit."}
+    ]
+  }
+];
+
+var META = {
+  Causation:{color:"#4A6FA5",emoji:"\uD83D\uDCCA",label:"Causation",short:"Planer:in"},
+  Effectuation:{color:"#6B8F71",emoji:"\uD83E\uDDE9",label:"Effectuation",short:"Gestalter:in"},
+  Bricolage:{color:"#C17817",emoji:"\uD83D\uDD27",label:"Bricolage",short:"Bastler:in"},
+  Hustle:{color:"#A8475E",emoji:"\u26A1",label:"Entrepreneurial Hustle",short:"Macher:in"}
+};
+
+var PROFILES = {
+  Causation:"Ihr denkt in Pl\u00E4nen, Analysen und klaren Zielen. In stabilen M\u00E4rkten ist das eine St\u00E4rke \u2014 in fr\u00FChen Gr\u00FCndungsphasen kann es zur Analyseparalyse f\u00FChren.",
+  Effectuation:"Ihr startet mit dem, was da ist, und lasst Ziele aus Mitteln und Partnerschaften entstehen. Typisch f\u00FCr erfahrene Entrepreneure \u2014 flexibel, aber manchmal ohne klare Richtung.",
+  Bricolage:"Ihr macht aus wenig viel. Kreative Neukombination ist euer Werkzeug. Stark unter Ressourcenknappheit \u2014 aber Skalierung kann zur Herausforderung werden.",
+  Hustle:"Ihr handelt schnell, unkonventionell und entschlossen. Das erzeugt Momentum und Legitimit\u00E4t \u2014 birgt aber Risiko, wenn Reflexion zu kurz kommt."
+};
+
+var cur = 0, sel = null, revealed = false, answers = [], shuffled = [];
+
+function shuffle(a){var s=a.slice();for(var i=s.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=s[i];s[i]=s[j];s[j]=tmp;}return s;}
+
+// Intro anim
+setTimeout(function(){document.getElementById("a1").classList.add("show")},150);
+setTimeout(function(){document.getElementById("a2").classList.add("show");document.getElementById("a3").classList.add("show")},400);
+setTimeout(function(){document.getElementById("a4").classList.add("show");document.getElementById("a5").classList.add("show")},650);
+setTimeout(function(){document.getElementById("a6").classList.add("show")},900);
+
+function startGame(){
+  var intro=document.getElementById("intro");
+  intro.style.transition="opacity .4s,transform .4s";
+  intro.style.opacity="0";
+  intro.style.transform="translateY(-20px)";
+  setTimeout(function(){
+    intro.classList.add("hidden");
+    cur=0;sel=null;revealed=false;answers=[];
+    shuffled=shuffle(DATA[0].o);
+    buildGame();
+    document.getElementById("game").classList.remove("hidden");
+  },420);
+}
+
+function buildGame(){
+  var sc=DATA[cur];
+  var g=document.getElementById("game");
+  var h="";
+
+  // Progress
+  h+='<div class="prog">';
+  for(var i=0;i<DATA.length;i++){
+    var w=i<cur?"100%":(i===cur?"50%":"0%");
+    var c=i<cur?"#6B8F71":"#4A6FA5";
+    h+='<div class="seg"><div class="segfill" style="width:'+w+';background:'+c+'"></div></div>';
+  }
+  h+='</div>';
+
+  h+='<div class="counter-label" style="animation:slideIn .4s ease">Szenario '+(cur+1)+' / '+DATA.length+'</div>';
+  h+='<div class="scene-text" style="animation:slideIn .5s ease .05s both">'+sc.s+'</div>';
+
+  if(!revealed){
+    h+='<div class="prompt" style="animation:slideIn .4s ease .1s both"><span class="prompt-dot"></span> Was w\u00FCrdet ihr tun?</div>';
+  }
+
+  var letters=["A","B","C"];
+  for(var i=0;i<shuffled.length;i++){
+    var o=shuffled[i];
+    var m=META[o.l];
+    var princ=o.p?(" \u2014 "+o.p):"";
+    var delay=(0.15+i*0.08).toFixed(2);
+    h+='<div class="card" id="c'+i+'" onclick="pickCard('+i+')" style="animation:slideIn .45s ease '+delay+'s both">';
+    h+='<div class="card-stripe"></div>';
+    h+='<div class="banner" id="b'+i+'" style="background:'+m.color+'">'+m.emoji+' '+m.label+princ+'</div>';
+    h+='<div class="card-row"><span class="letter" id="lt'+i+'">'+letters[i]+'</span><span>'+o.t+'</span></div>';
+    h+='<div class="explain" id="ex'+i+'">'+o.e+'</div>';
+    h+='</div>';
+  }
+
+  h+='<div class="action-bar" id="ab">';
+  if(!revealed){
+    h+='<button class="btn btn-primary" id="revBtn" onclick="doReveal()" disabled>Aufl\u00F6sen</button>';
+  }
+  h+='</div>';
+
+  g.innerHTML=h;
+}
+
+function pickCard(idx){
+  if(revealed)return;
+  sel=idx;
+  for(var i=0;i<3;i++){
+    var c=document.getElementById("c"+i);
+    if(i===idx){
+      c.classList.add("sel");
+      c.classList.add("pulse");
+      setTimeout((function(el){return function(){el.classList.remove("pulse")};})(c),400);
+    }else{
+      c.classList.remove("sel");
+    }
+  }
+  document.getElementById("revBtn").disabled=false;
+}
+
+function doReveal(){
+  if(sel===null)return;
+  revealed=true;
+  answers.push(shuffled[sel].l);
+
+  var pr=document.querySelector(".prompt");
+  if(pr)pr.style.opacity="0";
+
+  for(var i=0;i<3;i++){
+    document.getElementById("c"+i).classList.add("locked");
+  }
+
+  for(var i=0;i<3;i++){
+    (function(idx){
+      setTimeout(function(){
+        var card=document.getElementById("c"+idx);
+        var banner=document.getElementById("b"+idx);
+        var explain=document.getElementById("ex"+idx);
+        var lt=document.getElementById("lt"+idx);
+        var m=META[shuffled[idx].l];
+
+        card.classList.add("flipping");
+        setTimeout(function(){
+          card.classList.remove("flipping");
+          card.style.paddingTop="48px";
+          if(sel===idx){
+            card.classList.add("sel");
+            card.style.borderColor=m.color;
+            card.style.background=m.color+"14";
+          }
+          card.querySelector(".card-stripe").style.background=m.color;
+          banner.classList.add("show");
+          lt.style.background=m.color;
+          lt.style.borderColor=m.color;
+          lt.style.color="#fff";
+        },300);
+
+        setTimeout(function(){
+          explain.classList.add("show");
+        },500);
+      },idx*300);
+    })(i);
+  }
+
+  setTimeout(function(){
+    var label=cur<DATA.length-1?"Weiter \u2192":"Ergebnis \u2192";
+    document.getElementById("ab").innerHTML='<button class="btn btn-go" style="animation:slideIn .4s ease" onclick="goNext()">'+label+'</button>';
+  },1200);
+}
+
+function goNext(){
+  var g=document.getElementById("game");
+  g.style.transition="opacity .35s,transform .35s";
+  g.style.opacity="0";
+  g.style.transform="translateY(-16px)";
+
+  setTimeout(function(){
+    g.style.opacity="1";
+    g.style.transform="translateY(0)";
+    if(cur<DATA.length-1){
+      cur++;sel=null;revealed=false;
+      shuffled=shuffle(DATA[cur].o);
+      buildGame();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }else{
+      g.classList.add("hidden");
+      showResult();
+    }
+  },380);
+}
+
+function showResult(){
+  var rs=document.getElementById("result");
+  rs.classList.remove("hidden");
+
+  var counts={Causation:0,Effectuation:0,Bricolage:0,Hustle:0};
+  for(var i=0;i<answers.length;i++)counts[answers[i]]++;
+  var total=answers.length;
+  var sorted=Object.keys(counts).map(function(k){return[k,counts[k]]}).sort(function(a,b){return b[1]-a[1]});
+  var dom=sorted[0][0];
+  var dm=META[dom];
+
+  var h="";
+  h+='<div class="res-label intro-el" id="r1">Auswertung</div>';
+  h+='<h2 class="res-title intro-el" id="r2">Euer Logik-Profil</h2>';
+  h+='<p class="res-sub intro-el" id="r3">'+total+' Entscheidungen \u2014 eure Verteilung:</p>';
+
+  for(var i=0;i<sorted.length;i++){
+    var logic=sorted[i][0],count=sorted[i][1];
+    var m=META[logic];
+    var pct=total>0?((count/total)*100):0;
+    h+='<div class="brow" id="br'+i+'" style="transition-delay:'+(0.6+i*0.12)+'s">';
+    h+='<div class="blabel">'+m.emoji+' '+m.label+'</div>';
+    h+='<div class="btrack"><div class="bfill" id="bf'+i+'" style="background:linear-gradient(90deg,'+m.color+','+m.color+'bb);transition-delay:'+(0.8+i*0.15)+'s" data-w="'+pct+'">';
+    if(count>0)h+='<span class="bcount">'+count+'\u00D7</span>';
+    h+='</div></div></div>';
+  }
+
+  h+='<div class="profile-card" id="pc">';
+  h+='<div style="font-size:40px;margin-bottom:6px">'+dm.emoji+'</div>';
+  h+='<div style="font-family:Fraunces,Georgia,serif;font-size:30px;font-weight:900;color:'+dm.color+';margin-bottom:4px">'+dm.short+'</div>';
+  h+='<div style="font-family:DM Sans,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:'+dm.color+';margin-bottom:18px">Dominante Logik: '+dm.label+'</div>';
+  h+='<div style="font-family:DM Sans,sans-serif;font-size:14.5px;line-height:1.65;color:#7b8faa">'+PROFILES[dom]+'</div>';
+  h+='<div style="font-family:DM Sans,sans-serif;font-size:12.5px;line-height:1.55;color:#3d5a80;margin-top:20px;padding-top:18px;border-top:1px solid #162236">In der Realit\u00E4t kombinieren erfolgreiche Entrepreneure alle Logiken situationsabh\u00E4ngig. Es gibt kein \u201Ebesser\u201C oder \u201Eschlechter\u201C \u2014 nur die richtige Mischung zur richtigen Zeit.</div>';
+  h+='</div>';
+
+  h+='<button class="restart-btn" id="rb" onclick="doRestart()">\u21BA Nochmal spielen</button>';
+
+  rs.innerHTML=h;
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  setTimeout(function(){
+    document.getElementById("r1").classList.add("show");
+    document.getElementById("r2").classList.add("show");
+    document.getElementById("r3").classList.add("show");
+  },100);
+
+  setTimeout(function(){
+    for(var i=0;i<sorted.length;i++){
+      document.getElementById("br"+i).classList.add("show");
+      document.getElementById("bf"+i).style.width=document.getElementById("bf"+i).getAttribute("data-w")+"%";
+    }
+  },500);
+
+  setTimeout(function(){document.getElementById("pc").classList.add("show")},1400);
+  setTimeout(function(){document.getElementById("rb").classList.add("show")},1800);
+}
+
+function doRestart(){
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("result").innerHTML="";
+  var intro=document.getElementById("intro");
+  intro.classList.remove("hidden");
+  intro.style.opacity="1";
+  intro.style.transform="translateY(0)";
+  ["a1","a2","a3","a4","a5","a6"].forEach(function(id){document.getElementById(id).classList.remove("show")});
+  setTimeout(function(){document.getElementById("a1").classList.add("show")},150);
+  setTimeout(function(){document.getElementById("a2").classList.add("show");document.getElementById("a3").classList.add("show")},400);
+  setTimeout(function(){document.getElementById("a4").classList.add("show");document.getElementById("a5").classList.add("show")},650);
+  setTimeout(function(){document.getElementById("a6").classList.add("show")},900);
+  cur=0;sel=null;revealed=false;answers=[];shuffled=[];
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function toggleFS(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen();
+    document.getElementById("fsBtn").textContent="Vollbild beenden";
+  }else{
+    document.exitFullscreen();
+    document.getElementById("fsBtn").textContent="Vollbild";
+  }
+}
+</script>
+</body>
+</html>
