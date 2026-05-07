@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Model Canvas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  min-height:100vh;
+  font-family:'DM Sans',sans-serif;
+  background:#dfe3ea;
+}
+
+/* START */
+#startScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(170deg,#003063,#00509B);padding:24px;
+}
+.s-card{text-align:center;max-width:460px}
+.s-title{font-size:34px;font-weight:900;color:#fff;margin-bottom:8px}
+.s-sub{font-size:15px;color:rgba(255,255,255,.55);margin-bottom:36px;line-height:1.6}
+.s-btn{
+  font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;
+  color:#003063;background:#C8D317;border:none;padding:15px 44px;
+  border-radius:8px;cursor:pointer;transition:all .2s;
+}
+.s-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+
+/* CANVAS VIEW */
+#canvasScreen{display:none;flex-direction:column;height:100vh;overflow:hidden}
+
+.bar{
+  background:#003063;color:#fff;padding:8px 16px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.bar-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.bar-company{font-size:18px;font-weight:900;color:#C8D317}
+.bar-btn{
+  margin-left:auto;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+  color:#C8D317;background:rgba(200,211,23,.1);border:1px solid rgba(200,211,23,.2);
+  padding:6px 14px;border-radius:5px;cursor:pointer;transition:all .2s;
+}
+.bar-btn:hover{background:rgba(200,211,23,.2)}
+.bar-btn-fertig{background:rgba(46,204,113,.15);color:#2ECC71;border-color:rgba(46,204,113,.3)}
+.bar-btn-fertig:hover{background:rgba(46,204,113,.25)}
+
+/* Locked / view mode */
+.bmc-canvas.locked .cell-ta{
+  color:#1a1a2e;font-weight:500;cursor:default;
+  background:rgba(0,48,99,.03);border-radius:4px;padding:6px 8px;
+}
+.bmc-canvas.locked .cell-ta::placeholder{color:transparent}
+.bar-badge{
+  display:none;font-size:10px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:#2ECC71;background:rgba(46,204,113,.12);
+  padding:4px 10px;border-radius:4px;margin-left:8px;
+}
+.bar-badge.show{display:inline-block}
+.bar-btn-solution{background:rgba(243,156,18,.15);color:#F39C12;border-color:rgba(243,156,18,.3)}
+.bar-btn-solution:hover{background:rgba(243,156,18,.25)}
+.bar-btn-solution.active{background:#F39C12;color:#fff}
+.bmc-canvas.sol-mode .cell-ta{color:#003063;font-weight:600;background:rgba(243,156,18,.04)}
+
+/* THE CANVAS */
+.canvas-area{
+  flex:1;padding:12px;display:flex;align-items:stretch;justify-content:center;
+  overflow:hidden;
+}
+
+.bmc-canvas{
+  width:100%;max-width:1400px;
+  border:2px solid #8a95a7;
+  border-radius:10px;
+  background:#fff;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* TOP = 5 columns, 2 rows */
+.bmc-top{
+  flex:1;
+  display:flex;
+  border-bottom:2px solid #8a95a7;
+  min-height:0;
+}
+
+/* Each of the 5 major columns */
+.col{display:flex;flex-direction:column;min-height:0;min-width:0}
+.col-kp{flex:1;border-right:2px solid #8a95a7}
+.col-mid-left{flex:1;border-right:2px solid #8a95a7;display:flex;flex-direction:column}
+.col-vp{flex:1.3;border-right:2px solid #8a95a7}
+.col-mid-right{flex:1;border-right:2px solid #8a95a7;display:flex;flex-direction:column}
+.col-cs{flex:1}
+
+/* Split columns (KA/KR and CR/CH) */
+.col-half-top{flex:1;border-bottom:2px solid #8a95a7}
+.col-half-bot{flex:1}
+
+/* BOTTOM = 2 columns */
+.bmc-bot{
+  height:22%;min-height:80px;
+  display:flex;
+}
+.bot-left{flex:2;border-right:2px solid #8a95a7}
+.bot-right{flex:3}
+
+/* Cell styling */
+.cell{
+  padding:8px 10px;
+  display:flex;flex-direction:column;
+  height:100%;overflow:hidden;
+}
+.cell-h{
+  display:flex;align-items:center;gap:4px;
+  margin-bottom:4px;flex-shrink:0;
+}
+.cell-ico{font-size:12px}
+.cell-lbl{
+  font-size:8.5px;font-weight:800;letter-spacing:1.8px;
+  text-transform:uppercase;color:#003063;
+}
+.cell-ta{
+  flex:1;width:100%;border:none;outline:none;resize:none;
+  font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5;
+  color:#222;background:transparent;overflow-y:auto;
+}
+.cell-ta::placeholder{color:#bcc5d3;font-size:11px;font-style:italic}
+
+/* VP highlight */
+.col-vp{background:#f6f9ff}
+.col-vp .cell-lbl{font-size:9.5px}
+
+/* DRAW CARD */
+#drawScreen{
+  display:none;min-height:100vh;
+  align-items:center;justify-content:center;
+  background:linear-gradient(170deg,#003063,#00509B);
+  padding:24px;
+}
+.draw-scene{
+  text-align:center;perspective:800px;
+}
+.draw-card{
+  width:280px;height:380px;margin:0 auto 32px;
+  position:relative;cursor:pointer;
+  transform-style:preserve-3d;
+  transition:transform .8s cubic-bezier(.4,.2,.2,1);
+}
+.draw-card.flipped{transform:rotateY(180deg)}
+.draw-back,.draw-front{
+  position:absolute;inset:0;
+  border-radius:16px;
+  backface-visibility:hidden;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.draw-back{
+  background:linear-gradient(145deg,#002244,#003a6b);
+  border:3px solid rgba(200,211,23,.25);
+  font-size:72px;font-weight:900;color:rgba(200,211,23,.3);
+  box-shadow:0 8px 40px rgba(0,0,0,.4);
+}
+.draw-front{
+  background:linear-gradient(145deg,#003a6b,#00509B);
+  border:3px solid #C8D317;
+  transform:rotateY(180deg);
+  box-shadow:0 8px 40px rgba(0,0,0,.4),0 0 60px rgba(200,211,23,.1);
+}
+.draw-label{
+  font-size:11px;font-weight:700;letter-spacing:3px;
+  text-transform:uppercase;color:rgba(255,255,255,.4);
+  margin-bottom:16px;
+}
+.draw-name{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:38px;font-weight:900;color:#C8D317;
+  line-height:1.2;padding:0 20px;
+}
+.draw-go{
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s ease;
+}
+.draw-go.show{opacity:1;transform:translateY(0)}
+
+/* MOBILE */
+@media(max-width:768px){
+  #canvasScreen{height:auto;overflow:auto}
+  .canvas-area{padding:8px;overflow:visible}
+  .bmc-canvas{border-radius:8px}
+  .bmc-top{flex-direction:column;flex:none}
+  .col{flex:none!important;border-right:none!important;border-bottom:2px solid #8a95a7}
+  .col-cs{border-bottom:2px solid #8a95a7}
+  .col-mid-left,.col-mid-right{flex-direction:column}
+  .col-half-top{border-bottom:1px solid #b0b8c6}
+  .cell{min-height:80px}
+  .bmc-bot{flex-direction:column;height:auto}
+  .bot-left{border-right:none!important;border-bottom:2px solid #8a95a7}
+  .bot-right{min-height:80px}
+  .bar{flex-wrap:wrap;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<div id="startScreen">
+  <div class="s-card">
+    <div class="s-title">Business Model Canvas</div>
+    <div class="s-sub">Ihr bekommt zuf&auml;llig ein Unternehmen zugewiesen.<br>F&uuml;llt gemeinsam mit eurem Nachbarn die 9 Bausteine aus<br>(am besten &uuml;ber ein Ger&auml;t).</div>
+    <button class="s-btn" onclick="drawCard()">Karte ziehen &rarr;</button>
+  </div>
+</div>
+
+<div id="drawScreen">
+  <div class="draw-scene">
+    <div class="draw-card" id="drawCard">
+      <div class="draw-back" id="drawBack">?</div>
+      <div class="draw-front" id="drawFront">
+        <div class="draw-label">Euer Unternehmen</div>
+        <div class="draw-name" id="drawName"></div>
+      </div>
+    </div>
+    <button class="s-btn draw-go" id="drawGo" onclick="openCanvas()">Canvas &ouml;ffnen &rarr;</button>
+  </div>
+</div>
+
+<div id="canvasScreen">
+  <div class="bar">
+    <div>
+      <div class="bar-label">Euer Unternehmen</div>
+      <div class="bar-company"><span id="cName"></span><span class="bar-badge" id="badge">Abgegeben</span></div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="bar-btn" id="btnNeu" onclick="neu()">&#8635; Neues Unternehmen</button>
+      <button class="bar-btn bar-btn-fertig" id="btnFertig" onclick="fertig()">&#10003; Fertig</button>
+      <button class="bar-btn" id="btnEdit" onclick="bearbeiten()" style="display:none">&#9998; Bearbeiten</button>
+      <button class="bar-btn bar-btn-solution" id="btnSol" onclick="toggleSolution()" style="display:none">&#128161; L&ouml;sung anzeigen</button>
+    </div>
+  </div>
+
+  <div class="canvas-area">
+    <div class="bmc-canvas">
+
+      <!-- TOP: 5 columns -->
+      <div class="bmc-top">
+
+        <!-- Key Partners (full height) -->
+        <div class="col col-kp">
+          <div class="cell">
+            <div class="cell-h"><span class="cell-ico">&#129309;</span><span class="cell-lbl">Schl&uuml;sselpartner</span></div>
+            <textarea class="cell-ta" id="f0" placeholder="Wichtigste Partner und Lieferanten?"></textarea>
+          </div>
+        </div>
+
+        <!-- Key Activities / Key Resources (split) -->
+        <div class="col col-mid-left">
+          <div class="col-half-top">
+            <div class="cell">
+              <div class="cell-h"><span class="cell-ico">&#9881;&#65039;</span><span class="cell-lbl">Schl&uuml;sselaktivit&auml;ten</span></div>
+              <textarea class="cell-ta" id="f1" placeholder="Wichtigste Aktivit&auml;ten?"></textarea>
+            </div>
+          </div>
+          <div class="col-half-bot">
+            <div class="cell">
+              <div class="cell-h"><span class="cell-ico">&#127793;</span><span class="cell-lbl">Schl&uuml;sselressourcen</span></div>
+              <textarea class="cell-ta" id="f2" placeholder="Wichtigste Ressourcen?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Value Proposition (full height, wider) -->
+        <div class="col col-vp">
+          <div class="cell">
+            <div class="cell-h"><span class="cell-ico">&#128142;</span><span class="cell-lbl">Wertversprechen</span></div>
+            <textarea class="cell-ta" id="f3" placeholder="Welchen Wert schafft das Unternehmen f&uuml;r seine Kunden?"></textarea>
+          </div>
+        </div>
+
+        <!-- Customer Relationships / Channels (split) -->
+        <div class="col col-mid-right">
+          <div class="col-half-top">
+            <div class="cell">
+              <div class="cell-h"><span class="cell-ico">&#10084;&#65039;</span><span class="cell-lbl">Kundenbeziehungen</span></div>
+              <textarea class="cell-ta" id="f4" placeholder="Art der Beziehung?"></textarea>
+            </div>
+          </div>
+          <div class="col-half-bot">
+            <div class="cell">
+              <div class="cell-h"><span class="cell-ico">&#128666;</span><span class="cell-lbl">Kan&auml;le</span></div>
+              <textarea class="cell-ta" id="f5" placeholder="Wie wird der Kunde erreicht?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Segments (full height) -->
+        <div class="col col-cs">
+          <div class="cell">
+            <div class="cell-h"><span class="cell-ico">&#128100;</span><span class="cell-lbl">Kundensegmente</span></div>
+            <textarea class="cell-ta" id="f6" placeholder="Wer sind die Zielkunden?"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM: Cost / Revenue -->
+      <div class="bmc-bot">
+        <div class="bot-left">
+          <div class="cell">
+            <div class="cell-h"><span class="cell-ico">&#128176;</span><span class="cell-lbl">Kostenstruktur</span></div>
+            <textarea class="cell-ta" id="f7" placeholder="Gr&ouml;&szlig;te Kosten? Fix vs. variabel?"></textarea>
+          </div>
+        </div>
+        <div class="bot-right">
+          <div class="cell">
+            <div class="cell-h"><span class="cell-ico">&#128181;</span><span class="cell-lbl">Erl&ouml;sstr&ouml;me</span></div>
+            <textarea class="cell-ta" id="f8" placeholder="Wie verdient das Unternehmen Geld?"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+var list=["Duolingo","Zalando","TikTok","ChatGPT","ALDI"];
+var cur="";
+var locked=false;
+var showingSolution=false;
+var savedAnswers=["","","","","","","","",""];
+
+var solutions={
+  "Duolingo":[
+    "Content-Ersteller, Sprachexperten, App Stores (Apple, Google), Cloud-Infrastruktur (AWS), Bildungseinrichtungen",
+    "Entwicklung und Pflege der Lernalgorithmen, Gamification-Design, Content-Erstellung, A/B-Testing, Community-Management",
+    "KI/ML-Algorithmen, Nutzerdaten und Lernfortschrittsdaten, Marke, Entwicklerteam, User-Generated Content (Kurse)",
+    "Kostenloser, spielerischer Sprachunterricht f\u00FCr alle. Personalisiertes Lernen in kleinen Einheiten, jederzeit und \u00FCberall verf\u00FCgbar.",
+    "Automatisiert + Gamification: Streaks, Ranglisten, Benachrichtigungen. Community-Foren. Pers\u00F6nlich nur bei Duolingo for Schools.",
+    "Mobile App (prim\u00E4r), Web-App, App Store / Google Play, Social Media, Mundpropaganda",
+    "Mass Market: Sprachlernende weltweit (Freizeitlerner, Sch\u00FCler, Reisende). B2B: Schulen (Duolingo for Schools). Zahlende Premium-Nutzer als Subsegment.",
+    "Produktentwicklung (Engineering, KI), Server/Cloud-Infrastruktur, Content-Produktion, Marketing. Prim\u00E4r fixkostenlastig.",
+    "Freemium: Basis kostenlos, Super Duolingo (Abo ohne Werbung + Extra-Features). Werbung in der Gratis-Version. Duolingo English Test (Sprachzertifikat)."
+  ],
+  "Zalando":[
+    "Modemarken und -hersteller, Logistikdienstleister (eigene + externe), Zahlungsanbieter, Technologiepartner, Influencer",
+    "Plattformbetrieb und Kuratierung, Logistik und Fulfillment, Retourenmanagement, Personalisierung (KI-Empfehlungen), Markenpartnerschaften",
+    "Technologieplattform, Logistikinfrastruktur (Lager, Fulfillment-Center), Kundendaten, Marke und Vertrauen, Sortimentsbreite",
+    "Riesige Modeauswahl mit kostenlosem Versand und Retoure. Das Wohnzimmer wird zur Umkleidekabine. Convenience + Auswahl + Risikofreiheit.",
+    "Automatisiert: Personalisierte Empfehlungen, Wunschliste, Stilberatung. Loyalty-Programm (Zalando Plus). Kundenservice bei Problemen.",
+    "Online-Shop (Web + App), Social Media und Influencer-Marketing, Newsletter, Zalando Lounge (Outlet-Kanal)",
+    "Modebewusste Konsumenten (18\u201345, urban), Schnäppchenjäger (Zalando Lounge), Marken als B2B-Kunden (Partner-Programm / Plattformmodell)",
+    "Logistik und Fulfillment (Lager, Versand, Retouren), Technologieentwicklung, Marketing/Kundenakquise. Retouren als gr\u00F6\u00DFter Kostentreiber (~50% Retourenquote).",
+    "Handelsmargen (Eigenhandel), Provisionen (Plattform-/Partnerprogramm), Zalando Plus (Abo), Werbung (Zalando Marketing Services f\u00FCr Marken)."
+  ],
+  "TikTok":[
+    "Content Creator, Musikindustrie (Labels, Lizenzgeber), Werbetreibende, App Stores, Cloud-Anbieter, E-Commerce-Partner",
+    "Algorithmus-Entwicklung (Empfehlungssystem), Content-Moderation, Creator-Akquise und -Bindung, Werbeplattform-Betrieb",
+    "Empfehlungsalgorithmus (Kernressource), Nutzerdaten und Verhaltensdaten, Creator-Netzwerk, Musiklizenzen, Marke",
+    "Endlose, personalisierte Kurzvideos als Unterhaltung. Jeder kann Creator sein. Entdeckung statt Suche \u2014 der Algorithmus findet, was dich fesselt.",
+    "Algorithmisch: For-You-Page als Hauptinteraktion. Community: Duette, Stitches, Kommentare, Live. Creator Fund als Bindungsinstrument.",
+    "Mobile App (prim\u00E4r), Web, Earned Media (virale Verbreitung auf anderen Plattformen), Influencer",
+    "Nutzer/Zuschauer: Gen Z und Millennials (Hauptzielgruppe). Creator: Privatpersonen bis Profi-Creator. Werbetreibende: Marken aller Gr\u00F6\u00DFen.",
+    "Content-Moderation (Personal + KI), Serverinfrastruktur (enorme Datenmengen), Musiklizenzen, Marketing, Creator-Incentives. Prim\u00E4r fixkostenlastig.",
+    "Werbung (In-Feed Ads, Branded Hashtags, TopView). TikTok Shop (E-Commerce-Provision). Creator Marketplace (Vermittlungsgeb\u00FChr). Live Gifts (Mikrotransaktionen)."
+  ],
+  "ChatGPT":[
+    "Microsoft (Investor + Cloud via Azure), Content-Partner, Plugin-/API-Entwickler, Forschungseinrichtungen, App Stores",
+    "KI-Modelltraining und -Feinabstimmung, Infrastrukturbetrieb (GPU-Cluster), Sicherheits- und Alignment-Forschung, API-Plattformbetrieb, Produktentwicklung",
+    "Gro\u00DFe Sprachmodelle (GPT-Serie), Trainingsdaten, GPU-Rechenkapazit\u00E4t (Azure), Forschungsteam (KI-Talente), Marke und Nutzervertrauen",
+    "Sofortiger Zugang zu intelligentem Assistenten f\u00FCr Schreiben, Recherche, Programmierung, Lernen, Analyse. Nat\u00FCrliche Sprache statt komplexer Tools.",
+    "Automatisiert: Chat-Interface, personalisierter Verlauf. Community: Plugins, GPT Store. API: Self-Service-Integration f\u00FCr Entwickler.",
+    "Web-App, Mobile App, API (f\u00FCr Entwickler), Microsoft-Integration (Copilot), Mundpropaganda, Social Media",
+    "Breiter Mass Market: Wissensarbeiter, Studierende, Entwickler, Kreative. B2B: Unternehmen (ChatGPT Enterprise/Team). Entwickler (API-Kunden).",
+    "GPU-Rechenkosten (gr\u00F6\u00DFter Posten), Personalkosten (KI-Forscher), Trainingsdaten-Akquise, Cloud-Infrastruktur. Extrem kapitalintensiv.",
+    "Freemium: ChatGPT Free (werbefrei, begrenztes Modell). ChatGPT Plus/Pro (Abo, besseres Modell). API-Nutzungsgeb\u00FChren (pay-per-token). Enterprise-Lizenzen."
+  ],
+  "ALDI":[
+    "Eigenmarken-Hersteller (Zulieferer), Logistikunternehmen, Immobilienpartner (Standorte), wenige ausgew\u00E4hlte Markenhersteller",
+    "Einkauf und Verhandlung mit Lieferanten, Sortimentssteuerung (begrenzte SKUs), Filiallogistik, Aktionsware-Planung",
+    "Einkaufsmacht (Volumen), effiziente Lieferkette, Filialnetz, Eigenmarken-Portfolio, Unternehmenskultur (Kostendisziplin)",
+    "Hochwertige Lebensmittel zum niedrigsten Preis. Einfachheit statt \u00DCberfluss: kleines Sortiment, schneller Einkauf, verl\u00E4ssliche Qualit\u00E4t.",
+    "Minimal: Self-Service. Keine pers\u00F6nliche Beratung. Transaktional. Kundenbindung \u00FCber Preis und Gewohnheit, nicht \u00FCber Beziehung.",
+    "Eigene Filialen (prim\u00E4r), Prospekte/Handzettel, zunehmend Online-Shop (Non-Food), ALDI App",
+    "Preisbewusste Konsumenten aller Einkommensklassen. Familien. Smart Shopper, die Qualit\u00E4t zu niedrigem Preis suchen. Mass Market.",
+    "Wareneinkauf (gr\u00F6\u00DFter Posten), Personalkosten (minimal pro Filiale), Mieten/Immobilien, Logistik. Cost-driven: Alles auf Effizienz getrimmt.",
+    "Direktverkauf an Endkunden (Handelsmarge). Kein Abo, keine Werbung, keine Provision. Marge durch Volumen und Kosteneffizienz."
+  ]
+};
+
+function pick(){
+  var c=list[Math.floor(Math.random()*list.length)];
+  while(c===cur&&list.length>1)c=list[Math.floor(Math.random()*list.length)];
+  cur=c;
+}
+
+function clr(){for(var i=0;i<9;i++)document.getElementById("f"+i).value="";}
+
+function drawCard(){
+  pick();
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("drawScreen").style.display="flex";
+  document.getElementById("drawName").textContent=cur;
+  setTimeout(function(){document.getElementById("drawCard").classList.add("flipped")},400);
+  setTimeout(function(){document.getElementById("drawGo").classList.add("show")},1300);
+}
+
+function openCanvas(){
+  document.getElementById("drawScreen").style.display="none";
+  document.getElementById("canvasScreen").style.display="flex";
+  document.getElementById("cName").textContent=cur;
+}
+
+function neu(){
+  if(locked)return;
+  if(confirm("Neues Unternehmen? Eintr\u00E4ge werden gel\u00F6scht.")){
+    pick();
+    document.getElementById("cName").textContent=cur;
+    clr();
+  }
+}
+
+function fertig(){
+  locked=true;
+  showingSolution=false;
+  document.querySelector(".bmc-canvas").classList.add("locked");
+  for(var i=0;i<9;i++){
+    savedAnswers[i]=document.getElementById("f"+i).value;
+    document.getElementById("f"+i).readOnly=true;
+  }
+  document.getElementById("btnFertig").style.display="none";
+  document.getElementById("btnNeu").style.display="none";
+  document.getElementById("btnEdit").style.display="inline-block";
+  document.getElementById("btnSol").style.display="inline-block";
+  document.getElementById("badge").classList.add("show");
+}
+
+function bearbeiten(){
+  if(showingSolution) toggleSolution();
+  locked=false;
+  document.querySelector(".bmc-canvas").classList.remove("locked");
+  for(var i=0;i<9;i++){
+    document.getElementById("f"+i).readOnly=false;
+  }
+  document.getElementById("btnFertig").style.display="inline-block";
+  document.getElementById("btnNeu").style.display="inline-block";
+  document.getElementById("btnEdit").style.display="none";
+  document.getElementById("btnSol").style.display="none";
+  document.getElementById("badge").classList.remove("show");
+}
+
+function toggleSolution(){
+  var canvas=document.querySelector(".bmc-canvas");
+  var btn=document.getElementById("btnSol");
+  var badge=document.getElementById("badge");
+
+  if(!showingSolution){
+    // Save current answers and show solution
+    for(var i=0;i<9;i++){
+      savedAnswers[i]=document.getElementById("f"+i).value;
+    }
+    var sol=solutions[cur];
+    if(sol){
+      for(var i=0;i<9;i++){
+        document.getElementById("f"+i).value=sol[i];
+      }
+    }
+    canvas.classList.add("sol-mode");
+    btn.textContent="\u{1F4DD} Meine Antwort";
+    btn.classList.add("active");
+    badge.textContent="Musterl\u00F6sung";
+    badge.style.background="rgba(243,156,18,.15)";
+    badge.style.color="#F39C12";
+    showingSolution=true;
+  }else{
+    // Restore student answers
+    for(var i=0;i<9;i++){
+      document.getElementById("f"+i).value=savedAnswers[i];
+    }
+    canvas.classList.remove("sol-mode");
+    btn.textContent="\u{1F4A1} L\u00F6sung anzeigen";
+    btn.classList.remove("active");
+    badge.textContent="Abgegeben";
+    badge.style.background="rgba(46,204,113,.12)";
+    badge.style.color="#2ECC71";
+    showingSolution=false;
+  }
+}
+</script>
+</body>
+</html>
