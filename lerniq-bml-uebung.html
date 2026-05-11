@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LernIQ — Build-Measure-Learn Übung | LUH Strategic Management</title>
+<style>
+  :root {
+    --uniblau: #00509B;
+    --unigruen: #C8D317;
+    --uniblau40: #99B9D8;
+    --uniblauLight: #EAF1F8;
+    --unigruenLight: #F4F8D3;
+    --grau60: #666666;
+    --grau30: #B2B2B2;
+    --grau10: #E5E5E5;
+    --weiss: #FFFFFF;
+    --schwarz: #000000;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: var(--weiss);
+    color: var(--schwarz);
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+
+  /* Header — Uniblau-Balken im LUH-Stil */
+  header {
+    background: var(--uniblau);
+    color: var(--weiss);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  header .left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+  }
+  header .meta {
+    font-size: 12px;
+    color: #CCE0F0;
+  }
+  .logo-placeholder {
+    background: #1A6BB0;
+    color: #CCE0F0;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 2px;
+  }
+
+  /* Startup-Karte oben */
+  .startup-card {
+    background: var(--uniblauLight);
+    border-left: 4px solid var(--uniblau);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .startup-card .title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .startup-card .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: var(--uniblau);
+    color: var(--weiss);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .startup-card h2 {
+    font-size: 18px;
+    margin: 0;
+    color: var(--uniblau);
+  }
+  .startup-card .sub {
+    font-size: 13px;
+    color: var(--grau60);
+    font-style: italic;
+    margin: 0;
+  }
+  .startup-card p {
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: var(--schwarz);
+  }
+
+  /* Progress */
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .dots {
+    display: flex;
+    gap: 8px;
+  }
+  .dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1.5px solid var(--grau30);
+    background: var(--weiss);
+    color: var(--grau60);
+    transition: all 0.2s;
+  }
+  .dot.done {
+    background: var(--uniblau);
+    border-color: var(--uniblau);
+    color: var(--weiss);
+  }
+  .dot.active {
+    background: var(--uniblau);
+    border-color: var(--uniblau);
+    color: var(--weiss);
+    transform: scale(1.1);
+  }
+  .progress-label {
+    font-size: 13px;
+    color: var(--grau60);
+    margin-left: 8px;
+  }
+
+  /* Step-Karte */
+  .step {
+    background: var(--weiss);
+    border: 1px solid var(--uniblau40);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .step-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    background: var(--uniblau);
+    color: var(--weiss);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .step h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--uniblau);
+  }
+  .step .body {
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0 0 16px;
+  }
+
+  /* Kriterien-Box */
+  .criteria {
+    background: var(--uniblauLight);
+    border-left: 3px solid var(--uniblau);
+    padding: 12px 16px;
+    margin: 16px 0;
+  }
+  .criteria-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--uniblau);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .criteria ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--schwarz);
+    line-height: 1.7;
+  }
+
+  /* Textarea */
+  label.field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--uniblau);
+    letter-spacing: 1px;
+    margin: 20px 0 8px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 12px 14px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid var(--grau30);
+    border-radius: 2px;
+    resize: vertical;
+    color: var(--schwarz);
+    background: var(--weiss);
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--uniblau);
+    box-shadow: 0 0 0 2px var(--uniblauLight);
+  }
+
+  /* Buttons */
+  button {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 18px;
+    border: 1.5px solid var(--uniblau);
+    background: var(--weiss);
+    color: var(--uniblau);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  button:hover:not(:disabled) {
+    background: var(--uniblau);
+    color: var(--weiss);
+  }
+  button.primary {
+    background: var(--uniblau);
+    color: var(--weiss);
+  }
+  button.primary:hover:not(:disabled) {
+    background: #003C75;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  /* Beispielantworten */
+  .example {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--grau30);
+  }
+  .example-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--uniblau);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .example-item {
+    margin-bottom: 16px;
+  }
+  .example-item-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--uniblau);
+    margin: 0 0 4px;
+  }
+  .example-item-text {
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0;
+    color: var(--schwarz);
+  }
+  .pointe {
+    background: var(--unigruenLight);
+    border-left: 3px solid var(--unigruen);
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--schwarz);
+  }
+  .pointe strong {
+    color: var(--uniblau);
+  }
+
+  /* Abschluss */
+  .done-message {
+    background: var(--unigruenLight);
+    border-left: 3px solid var(--unigruen);
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+  .done-message strong {
+    color: var(--uniblau);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--grau30);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--grau60);
+  }
+  footer .accent {
+    height: 4px;
+    width: 80px;
+    background: var(--unigruen);
+  }
+
+  @media (max-width: 700px) {
+    header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 16px; }
+    .page { padding: 0 12px 32px; }
+    .step { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="left">
+    <span class="logo-placeholder">[ime-Logo]</span>
+    <div>
+      <h1>Build-Measure-Learn Übung</h1>
+      <div class="meta">Lean Startup · Master Strategic Management</div>
+    </div>
+  </div>
+  <span class="logo-placeholder">[LUH-Logo]</span>
+</header>
+
+<div class="page">
+
+  <div class="startup-card">
+    <div class="title">
+      <div class="icon">L</div>
+      <div>
+        <h2>LernIQ — fiktives Startup</h2>
+        <p class="sub">KI-basierte Nachhilfe-App für Oberstufen-Mathematik</p>
+      </div>
+    </div>
+    <p>
+      Drei Gründer wollen Schülern individuell zugeschnittene Mathe-Erklärungen per KI-Chatbot anbieten. Monatsabo 19,90 €. Zielgruppe: 16- bis 19-Jährige in Deutschland. Vor dem Bau: vier Fragen aus dem Build-Measure-Learn-Loop anwenden.
+    </p>
+  </div>
+
+  <div class="progress">
+    <div class="dots" id="dots"></div>
+    <span class="progress-label" id="progressLabel"></span>
+  </div>
+
+  <div id="stepContainer"></div>
+
+  <div class="controls">
+    <button id="btnPrev" style="visibility: hidden;">← Zurück</button>
+    <button id="btnNext" class="primary">Weiter →</button>
+  </div>
+
+  <footer>
+    <span>Prof. Dr. Simon Kleinert | Strategic Management</span>
+    <span class="accent"></span>
+  </footer>
+
+</div>
+
+<script>
+const steps = [
+  {
+    label: "Hypothese",
+    iconChar: "1",
+    taskTitle: "Schritt 1 · Testbare Hypothese formulieren",
+    taskBody: "Formuliere für LernIQ eine Werthypothese (zahlt der Kunde dafür?) UND eine Wachstumshypothese (wie kommen neue Kunden?). Jede Hypothese muss spezifisch, testbar und falsifizierbar sein.",
+    criteria: [
+      "Spezifisch: eine Variable, präzise formuliert",
+      "Testbar: konkrete Methode zur Prüfung",
+      "Falsifizierbar: vorab definierter Schwellenwert"
+    ],
+    placeholder: "Wir glauben, dass…\nWir testen das durch…\nWir sind widerlegt, wenn…",
+    example: {
+      items: [
+        {
+          label: "Werthypothese",
+          text: "Wir glauben, dass Oberstufenschüler in Deutschland mit Mathe-Schwierigkeiten bereit sind, 19,90 € pro Monat für KI-gestützte Erklärungen zu zahlen. Wir testen das durch eine Landing Page mit Vorbestelloption. Wir sind widerlegt, wenn weniger als 5 % der Besucher in der Zielgruppe ihre E-Mail-Adresse zur Vorbestellung hinterlassen."
+        },
+        {
+          label: "Wachstumshypothese",
+          text: "Wir glauben, dass aktive Nutzer LernIQ an mindestens zwei Mitschüler weiterempfehlen, weil bessere Noten sichtbares Sozialkapital sind. Wir testen das durch einen Referral-Tracker in der ersten Beta-Kohorte. Wir sind widerlegt, wenn der virale Koeffizient k unter 0,5 bleibt."
+        }
+      ],
+      note: "Beide Hypothesen erfüllen die drei Pflichtfelder der testbaren Hypothese (Ries 2011; Blank 2013): spezifisch, testbar, falsifizierbar mit quantitativem Schwellenwert vorab."
+    }
+  },
+  {
+    label: "MVP",
+    iconChar: "2",
+    taskTitle: "Schritt 2 · Den richtigen MVP wählen",
+    taskBody: "Welcher MVP-Typ passt zur Werthypothese? Was muss der MVP minimal können, damit er die Hypothese tatsächlich prüft — und nicht nur eine andere Frage beantwortet?",
+    criteria: [
+      "Tangibility: greifbar, kein Konzeptpapier",
+      "Viable: nutzbar genug für echtes Feedback",
+      "Minimal: nur die Kernhypothese testen"
+    ],
+    placeholder: "Wir bauen…\nDer MVP testet konkret…\nWir vermeiden zu bauen…",
+    example: {
+      items: [
+        {
+          label: "MVP-Typ: Landing Page + Concierge",
+          text: "Schritt 1 — Landing Page mit Demo-Video und Vorbestell-Button (Smoke Test, prüft Werthypothese). Schritt 2 — Wer vorbestellt, bekommt für 14 Tage echte Mathe-Erklärungen, aber NICHT von einer KI, sondern manuell von einem Tutor per Chat (Concierge-MVP, prüft ob die Erklärungen überhaupt helfen)."
+        },
+        {
+          label: "Was wir nicht bauen",
+          text: "Wir bauen KEINE KI-Pipeline, KEINE App, KEIN Zahlungssystem. Die KI ist die teuerste Komponente und gleichzeitig die unkritischste: ob KI oder Mensch erklärt, ist für die Werthypothese irrelevant — die Frage ist, ob Schüler überhaupt für solche Erklärungen zahlen."
+        }
+      ],
+      note: "Erfüllt alle drei Shepherd-&-Gruber-Dimensionen (2021): Tangibility (echtes Erlebnis), Sharability (Schüler können Freunden zeigen), Understandability (Mehrwert sofort erkennbar). Minimal-Prinzip: die teuerste Annahme zuletzt bauen."
+    }
+  },
+  {
+    label: "Daten",
+    iconChar: "3",
+    taskTitle: "Schritt 3 · Datenerhebung passend zur Hypothese",
+    taskBody: "Welche Erhebungsmethode prüft die Werthypothese sauber? Beachte: qualitative Methoden präzisieren Hypothesen, quantitative testen sie. Was passt in welcher Reihenfolge?",
+    criteria: [
+      "Methodische Passung zur Hypothese",
+      "Validitätsproblem antizipieren",
+      "Stichprobe und Zeitraum vorab definieren"
+    ],
+    placeholder: "Wir erheben Daten durch…\nWir antizipieren folgendes Validitätsproblem…",
+    example: {
+      items: [
+        {
+          label: "Phase 1 — Qualitativ (Tiefeninterviews)",
+          text: "10 Interviews mit Oberstufenschülern, Mom-Test-Logik: nicht „würdest du eine KI-Nachhilfe nutzen?\u201C, sondern „erzähl mir vom letzten Mal, als du in Mathe stecken geblieben bist — was hast du dann gemacht?\u201C. Ziel: verstehen, welche Workarounds existieren und ob das Problem stark genug ist."
+        },
+        {
+          label: "Phase 2 — Quantitativ (Landing-Page-Test)",
+          text: "Landing Page mit 2 Varianten (A: „KI-Tutor\u201C, B: „24/7-Mathehilfe\u201C). Traffic über Instagram-Ads an Zielgruppe 16–19 Jahre. n ≥ 400 Besucher pro Variante. Outcome: Vorbestell-Rate. Vorab definiert: Erfolg bei ≥ 5 %, Misserfolg bei ≤ 2 %."
+        }
+      ],
+      note: "Antizipiertes Validitätsproblem: Hypothetical Bias (List & Gallet 2001) — Nutzer sagen Zahlungsbereitschaft, die sie tatsächlich nicht haben. Deshalb echte Vorbestellung mit E-Mail-Verbindlichkeit, nicht reine Umfrage."
+    }
+  },
+  {
+    label: "Metriken",
+    iconChar: "4",
+    taskTitle: "Schritt 4 · Actionable Metrics festlegen",
+    taskBody: "Welche Metriken brauchen wir, um Persevere vs. Pivot zu entscheiden? Achtung: Vanity Metrics (z.B. Page Views, Total Signups) liefern keine Entscheidungsgrundlage.",
+    criteria: [
+      "Actionable: erlaubt Pivot/Persevere-Entscheidung",
+      "Hypothesen-spezifisch operationalisiert",
+      "Kohorten-basiert, nicht kumulativ aggregiert"
+    ],
+    placeholder: "Wir messen…\nVanity-Metriken, die wir bewusst NICHT als Steuerung nutzen…",
+    example: {
+      items: [
+        {
+          label: "Actionable Metrics",
+          text: "1) Vorbestell-Conversion-Rate pro Kohorte (Werthypothese). 2) Day-14-Aktivierungsrate der Concierge-Nutzer (haben sie tatsächlich Erklärungen abgerufen?). 3) Net Promoter Score nach 14 Tagen + Anzahl spontaner Weiterempfehlungen (Wachstumshypothese, virale Schleife). 4) Bereitschaft zur Zahlung nach Concierge-Phase (echte Kreditkartenangabe, nicht Absichtserklärung)."
+        },
+        {
+          label: "Vanity Metrics, die wir bewusst ignorieren",
+          text: "Instagram-Followers, Page Views, Total Email-Signups (kumulativ), Pressemeldungen. Diese Zahlen steigen monoton und sagen nichts über die Hypothese aus — sie reagieren auf Akquise, nicht auf Produktqualität."
+        }
+      ],
+      note: "Vermeidet das Aggregationsproblem (Simpson 1951): kumulative Zahlen verbergen, ob spätere Kohorten schlechter performen. Anwendung von Innovation Accounting (Ries 2011) — alle Metriken sind hypothesen-spezifisch und vorab mit Schwellenwert versehen."
+    }
+  }
+];
+
+let currentStep = 0;
+let showExample = false;
+const userAnswers = ["", "", "", ""];
+
+const stepContainer = document.getElementById("stepContainer");
+const dotsContainer = document.getElementById("dots");
+const progressLabel = document.getElementById("progressLabel");
+const btnPrev = document.getElementById("btnPrev");
+const btnNext = document.getElementById("btnNext");
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function renderProgress() {
+  dotsContainer.innerHTML = "";
+  steps.forEach((s, i) => {
+    const dot = document.createElement("div");
+    dot.className = "dot" + (i === currentStep ? " active" : i < currentStep ? " done" : "");
+    dot.textContent = i < currentStep ? "✓" : (i + 1);
+    dotsContainer.appendChild(dot);
+  });
+  progressLabel.textContent = "Schritt " + (currentStep + 1) + " von " + steps.length + " · " + steps[currentStep].label;
+}
+
+function renderStep() {
+  const s = steps[currentStep];
+  let html = "";
+
+  html += '<div class="step">';
+  html += '<div class="step-header">';
+  html += '<div class="step-icon">' + s.iconChar + '</div>';
+  html += '<h3>' + s.taskTitle + '</h3>';
+  html += '</div>';
+  html += '<p class="body">' + s.taskBody + '</p>';
+
+  html += '<div class="criteria">';
+  html += '<div class="criteria-label">ANFORDERUNGEN AN GUTE ANTWORTEN</div>';
+  html += '<ul>';
+  s.criteria.forEach(c => { html += '<li>' + c + '</li>'; });
+  html += '</ul>';
+  html += '</div>';
+
+  html += '<label class="field-label">EURE ANTWORT</label>';
+  html += '<textarea id="answerInput" placeholder="' + escapeHtml(s.placeholder) + '">' + escapeHtml(userAnswers[currentStep]) + '</textarea>';
+
+  html += '<div style="margin-top: 12px;">';
+  html += '<button id="btnExample">' + (showExample ? "Beispielantworten ausblenden" : "Beispielantworten anzeigen") + '</button>';
+  html += '</div>';
+
+  if (showExample) {
+    html += '<div class="example">';
+    html += '<div class="example-label">BEISPIELANTWORTEN</div>';
+    s.example.items.forEach(item => {
+      html += '<div class="example-item">';
+      html += '<p class="example-item-label">' + item.label + '</p>';
+      html += '<p class="example-item-text">' + item.text + '</p>';
+      html += '</div>';
+    });
+    html += '<div class="pointe"><strong>Methodische Pointe:</strong> ' + s.example.note + '</div>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  stepContainer.innerHTML = html;
+
+  document.getElementById("answerInput").addEventListener("input", e => {
+    userAnswers[currentStep] = e.target.value;
+  });
+  document.getElementById("btnExample").addEventListener("click", () => {
+    showExample = !showExample;
+    renderStep();
+  });
+}
+
+function renderControls() {
+  btnPrev.style.visibility = currentStep === 0 ? "hidden" : "visible";
+  btnNext.textContent = currentStep === steps.length - 1 ? "Übung abschließen ✓" : "Weiter →";
+}
+
+function render() {
+  renderProgress();
+  renderStep();
+  renderControls();
+}
+
+btnPrev.addEventListener("click", () => {
+  if (currentStep > 0) {
+    currentStep--;
+    showExample = false;
+    render();
+  }
+});
+
+btnNext.addEventListener("click", () => {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    showExample = false;
+    render();
+  } else {
+    btnNext.disabled = true;
+    btnNext.textContent = "Übung abgeschlossen ✓";
+    stepContainer.insertAdjacentHTML("beforeend",
+      '<div class="done-message"><strong>Geschafft.</strong> Studierende haben in 10 Minuten den Build-Measure-Learn-Loop einmal komplett durchlaufen — von der falsifizierbaren Hypothese bis zur Actionable Metric.</div>');
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
