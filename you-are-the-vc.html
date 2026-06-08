@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You are the VC — Entrepreneurial Finance</title>
+<style>
+  :root {
+    --ink: #0d1117;
+    --ink-2: #161b22;
+    --panel: #1c2230;
+    --panel-2: #232b3b;
+    --line: #2e3850;
+    --paper: #e8e4d8;
+    --muted: #8b96ad;
+    --text: #e6e9f0;
+    --go: #3ddc97;       /* invest / money */
+    --go-dim: #1d6b4d;
+    --risk: #ff6b6b;      /* danger / pass */
+    --warn: #f4b740;      /* hype / fomo */
+    --jockey: #6aa9ff;    /* team */
+    --horse: #c792ea;     /* business */
+    --shadow: 0 18px 50px rgba(0,0,0,.55);
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    --mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(61,220,151,.06), transparent 60%),
+      radial-gradient(900px 600px at 0% 110%, rgba(106,169,255,.07), transparent 55%),
+      var(--ink);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 28px 60px; }
+
+  /* ---------- HUD ---------- */
+  .hud {
+    display: flex; align-items: center; gap: 22px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 16px; margin-bottom: 26px;
+  }
+  .brand { font-family: var(--serif); font-size: 26px; letter-spacing: .3px; }
+  .brand b { color: var(--go); font-style: italic; font-weight: normal; }
+  .hud .spacer { flex: 1; }
+  .stat { text-align: right; }
+  .stat .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .stat .v { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+  .stat .v.cap { color: var(--go); }
+  .pill {
+    font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+    font-family: var(--mono); color: var(--muted);
+  }
+  .pill.hot { color: var(--warn); border-color: var(--warn); background: rgba(244,183,64,.08); }
+  .pill.cold { color: var(--jockey); border-color: var(--jockey); background: rgba(106,169,255,.08); }
+
+  /* ---------- screens ---------- */
+  .screen { display: none; animation: fade .35s ease both; }
+  .screen.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  h1.title { font-family: var(--serif); font-size: 52px; line-height: 1.05; margin-bottom: 14px; }
+  h1.title em { color: var(--go); font-style: italic; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; margin-bottom: 30px; }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 820px; }
+  .mode-card {
+    background: linear-gradient(180deg, var(--panel), var(--ink-2));
+    border: 1px solid var(--line); border-radius: 16px; padding: 24px;
+    cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .mode-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .mode-card.hot:hover { border-color: var(--warn); }
+  .mode-card.cold:hover { border-color: var(--jockey); }
+  .mode-card .tag { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .mode-card.hot .tag { color: var(--warn); }
+  .mode-card.cold .tag { color: var(--jockey); }
+  .mode-card h3 { font-family: var(--serif); font-size: 26px; margin-bottom: 8px; }
+  .mode-card p { color: var(--muted); font-size: 15px; }
+
+  /* ---------- deal card ---------- */
+  .deal-meta { display: flex; align-items: baseline; gap: 16px; margin-bottom: 6px; flex-wrap: wrap; }
+  .deal-progress { font-family: var(--mono); color: var(--muted); font-size: 13px; letter-spacing: 1px; }
+  .timerbar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 10px 0 22px; }
+  .timerbar > div { height: 100%; background: var(--warn); width: 100%; transition: width .25s linear; }
+
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--ink-2));
+    border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card-head { padding: 26px 28px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 20px; }
+  .logo {
+    width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0;
+    display: grid; place-items: center; font-family: var(--serif); font-size: 30px; font-weight: 700;
+    background: var(--panel-2); border: 1px solid var(--line);
+  }
+  .card-head .who { flex: 1; }
+  .card-head h2 { font-family: var(--serif); font-size: 30px; }
+  .card-head .sector { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .tagline { font-style: italic; color: var(--paper); font-size: 15px; margin-top: 8px; }
+  .ask-box { text-align: right; flex-shrink: 0; }
+  .ask-box .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .ask-box .ask { font-family: var(--mono); font-size: 24px; font-weight: 700; }
+  .ask-box .val { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+  .signals { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .sigcol { padding: 22px 28px; }
+  .sigcol:first-child { border-right: 1px solid var(--line); }
+  .sigcol h4 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .sigcol.jockey h4 { color: var(--jockey); }
+  .sigcol.horse h4 { color: var(--horse); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .sigcol.jockey .dot { background: var(--jockey); }
+  .sigcol.horse .dot { background: var(--horse); }
+  .sig { display: flex; gap: 10px; font-size: 15px; margin-bottom: 11px; color: var(--text); }
+  .sig .ic { flex-shrink: 0; opacity: .7; }
+
+  .market-note {
+    padding: 14px 28px; font-size: 14px; color: var(--warn);
+    background: rgba(244,183,64,.06); border-top: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .market-note.cold { color: var(--jockey); background: rgba(106,169,255,.05); }
+
+  .actions { display: flex; gap: 14px; padding: 22px 28px 26px; align-items: center; flex-wrap: wrap; }
+  .ticket { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+  .ticket label { font-size: 13px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; }
+  .ticket input { width: 220px; accent-color: var(--go); }
+  .ticket .amt { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--go); min-width: 70px; }
+
+  button.btn {
+    font-family: var(--sans); font-size: 16px; font-weight: 700;
+    padding: 13px 26px; border-radius: 11px; border: 1px solid var(--line);
+    cursor: pointer; transition: transform .12s, filter .12s, background .12s;
+    background: var(--panel-2); color: var(--text);
+  }
+  button.btn:hover { transform: translateY(-2px); }
+  button.btn:active { transform: translateY(0); }
+  button.btn.invest { background: var(--go); color: #062b1c; border-color: var(--go); }
+  button.btn.invest:hover { filter: brightness(1.08); }
+  button.btn.pass { background: transparent; color: var(--risk); border-color: var(--risk); }
+  button.btn.pass:hover { background: rgba(255,107,107,.1); }
+  button.btn.ghost { background: transparent; color: var(--muted); }
+  button.btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+  /* ---------- results ---------- */
+  .verdict { text-align: center; padding: 18px 0 30px; }
+  .verdict .multiple { font-family: var(--mono); font-size: 76px; font-weight: 800; line-height: 1; }
+  .verdict .multiple.win { color: var(--go); }
+  .verdict .multiple.loss { color: var(--risk); }
+  .verdict .multiple.flat { color: var(--warn); }
+  .verdict .label { color: var(--muted); text-transform: uppercase; letter-spacing: 2px; font-size: 13px; margin-top: 10px; }
+  .verdict .summary { font-size: 18px; max-width: 640px; margin: 16px auto 0; color: var(--text); }
+
+  .ledger { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin: 26px 0; }
+  .ledger .row {
+    display: grid; grid-template-columns: 1.4fr .8fr .9fr 1fr 2.2fr;
+    gap: 14px; padding: 14px 20px; align-items: center; font-size: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .ledger .row.head { background: var(--ink-2); border-top: none; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .ledger .row .name { font-weight: 700; }
+  .ledger .row .name small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .ledger .mono { font-family: var(--mono); }
+  .ledger .mult.win { color: var(--go); font-weight: 700; }
+  .ledger .mult.loss { color: var(--risk); }
+  .ledger .mult.flat { color: var(--warn); }
+  .ledger .mult.pass { color: var(--muted); }
+  .ledger .story { color: var(--muted); font-size: 13px; }
+  .ledger .row.passed { opacity: .5; }
+
+  .lessons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0 30px; }
+  .lesson {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+    border-top: 3px solid var(--go);
+  }
+  .lesson:nth-child(2) { border-top-color: var(--warn); }
+  .lesson:nth-child(3) { border-top-color: var(--jockey); }
+  .lesson h4 { font-family: var(--serif); font-size: 19px; margin-bottom: 8px; }
+  .lesson p { color: var(--muted); font-size: 14px; }
+
+  .footer-actions { display: flex; gap: 14px; justify-content: center; margin-top: 10px; }
+
+  .cite { color: var(--muted); font-size: 12px; font-family: var(--mono); text-align: center; margin-top: 30px; letter-spacing: .3px; }
+
+  @media (max-width: 760px) {
+    .choices, .signals, .lessons { grid-template-columns: 1fr; }
+    .sigcol:first-child { border-right: none; border-bottom: 1px solid var(--line); }
+    h1.title { font-size: 38px; }
+    .ledger .row { grid-template-columns: 1fr; gap: 4px; }
+    .ledger .row.head { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="brand">Bluewater <b>Ventures</b></div>
+    <div class="spacer"></div>
+    <div id="hudMode" class="pill">Setup</div>
+    <div class="stat"><div class="k">Dry Powder</div><div class="v cap" id="hudCap">€15.0M</div></div>
+    <div class="stat"><div class="k">Deals gesehen</div><div class="v" id="hudSeen">0 / 8</div></div>
+    <div class="stat"><div class="k">Investiert in</div><div class="v" id="hudInv">0</div></div>
+  </div>
+
+  <!-- SCREEN 1: INTRO -->
+  <section id="screen-intro" class="screen active">
+    <h1 class="title">Du bist <em>der VC</em>.</h1>
+    <p class="lede">
+      Dein Fonds hat <b>€15 Mio.</b> zu investieren. Acht Startups klopfen an. Du siehst zu jedem
+      Team-Signale (<span style="color:var(--jockey)">Jockey</span>) und Business-Signale
+      (<span style="color:var(--horse)">Horse</span>) — aber nie die ganze Wahrheit.
+      Entscheide bei jedem: <b style="color:var(--go)">investieren</b> oder
+      <b style="color:var(--risk)">passen</b>. Nach sieben Jahren zählt nur eins: dein Portfolio-Return.
+    </p>
+    <p class="lede" style="margin-top:-14px;">Wähle dein Marktklima:</p>
+    <div class="choices">
+      <div class="mode-card hot" onclick="startGame('hot')">
+        <div class="tag">● Hot Market</div>
+        <h3>FOMO-Modus</h3>
+        <p>Bewertungen sind aufgeheizt (+50 %). Pro Deal nur <b>20 Sekunden</b> — entscheide aus dem Bauch.
+        „Too much money chasing too few deals."</p>
+      </div>
+      <div class="mode-card cold" onclick="startGame('cold')">
+        <div class="tag">● Cold Market</div>
+        <h3>Due-Diligence-Modus</h3>
+        <p>Faire Bewertungen, kein Zeitdruck. Du kannst in Ruhe analysieren —
+        wie ein VC in einer Marktbereinigung.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: DEAL -->
+  <section id="screen-deal" class="screen">
+    <div class="deal-meta">
+      <span class="deal-progress" id="dealProgress">Deal 1 / 8</span>
+      <span class="deal-progress" id="dealTimerLabel" style="color:var(--warn); display:none;">⏱ <span id="dealTimer">20</span>s</span>
+    </div>
+    <div class="timerbar" id="timerWrap" style="display:none;"><div id="timerFill"></div></div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="logo" id="dLogo">N</div>
+        <div class="who">
+          <h2 id="dName">Name</h2>
+          <div class="sector" id="dSector">Sektor · Stage</div>
+          <div class="tagline" id="dTag">„Tagline"</div>
+        </div>
+        <div class="ask-box">
+          <div class="k">Sucht</div>
+          <div class="ask" id="dAsk">€2.0M</div>
+          <div class="val" id="dVal">@ €10M post</div>
+        </div>
+      </div>
+
+      <div class="signals">
+        <div class="sigcol jockey">
+          <h4><span class="dot"></span> Jockey · Team</h4>
+          <div id="dJockey"></div>
+        </div>
+        <div class="sigcol horse">
+          <h4><span class="dot"></span> Horse · Business</h4>
+          <div id="dHorse"></div>
+        </div>
+      </div>
+
+      <div class="market-note" id="dMarket"><span>●</span><span id="dMarketText"></span></div>
+
+      <div class="actions">
+        <div class="ticket">
+          <label>Ticket</label>
+          <input type="range" id="ticket" min="1" max="5" step="0.5" value="2" oninput="updateTicket()">
+          <span class="amt" id="ticketAmt">€2.0M</span>
+        </div>
+        <button class="btn pass" onclick="decide(false)">Passen</button>
+        <button class="btn invest" id="investBtn" onclick="decide(true)">Investieren</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: RESULTS -->
+  <section id="screen-results" class="screen">
+    <div class="verdict">
+      <div class="multiple" id="rMultiple">0.0×</div>
+      <div class="label">Return on deployed capital · nach 7 Jahren</div>
+      <div class="summary" id="rSummary"></div>
+    </div>
+
+    <div class="ledger" id="rLedger"></div>
+
+    <div class="lessons">
+      <div class="lesson">
+        <h4>Power Law</h4>
+        <p id="lessonPower">Ein einziger Treffer trägt den ganzen Fonds. Streuung allein rettet dich nicht — du brauchst den Ausreißer.</p>
+      </div>
+      <div class="lesson">
+        <h4>Hype ≠ Horse</h4>
+        <p id="lessonHorse">Das Buzzword-Startup mit Star-Team aber ohne Traktion floppt oft. Der unsexy Deal mit echter Retention macht den Return.</p>
+      </div>
+      <div class="lesson">
+        <h4>FOMO kostet</h4>
+        <p id="lessonFomo">Im Hot Market zahlst du Aufpreis und kürzt die Due Diligence. Dieselbe Firma, schlechterer Einstieg, schlechterer Return.</p>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <button class="btn ghost" onclick="resetGame()">Nochmal — anderes Marktklima</button>
+    </div>
+
+    <div class="cite">
+      Mechanik nach: Gompers et al. (2020) · Kaplan, Sensoy &amp; Strömberg (2009) · Kleinert &amp; Hildebrand (2024) · Sahlman (1987)
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ---------------- DATA ----------------
+// outcomeMult = realer Exit-Multiple auf das investierte Ticket nach 7 Jahren (Cold-Market-Basis).
+// Im Hot Market wird der Einstieg teurer (Bewertung +50%), daher Multiple * 0.66 (Verwässerung des Returns).
+const STARTUPS = [
+  {
+    logo: "N", name: "NeuralForge", sector: "AI-Infrastruktur · Seed", ask: 3.0, postCold: 28,
+    tag: "„Wir bauen das Betriebssystem für autonome Agenten.“",
+    jockey: ["Gründer ex-DeepMind, 2 PhDs aus Stanford", "Top-Tier-Netzwerk, viral auf X", "Charismatischer, geübter Pitch"],
+    horse: ["Noch kein Produkt, kein Umsatz", "Keine zahlenden Kunden", "Bewertung rein auf Team + Buzzword"],
+    outcomeMult: 0.2,
+    story: "Klassische FOMO-Falle: Star-Team, Buzzword, keine Traktion. Hype kühlte ab, kein Product-Market-Fit."
+  },
+  {
+    logo: "K", name: "Kettl", sector: "Logistik-Software für Unternehmen · Series A", ask: 2.5, postCold: 14,
+    tag: "„Disposition für mittelständische Speditionen.“",
+    jockey: ["Solides, unauffälliges Branchen-Team", "Kein prominenter Hintergrund", "Nüchterner, datengetriebener Pitch"],
+    horse: ["€1,4 Mio. wiederkehrender Jahresumsatz, +12 % pro Monat", "Netto-Umsatzbindung 128 % (Bestandskunden wachsen)", "Wenig Wettbewerb, hohe Wechselkosten"],
+    outcomeMult: 28,
+    story: "Der Fonds-Macher. Unsexy, aber starke Retention und reale Umsätze. Strategischer Exit nach 6 Jahren."
+  },
+  {
+    logo: "T", name: "Tindr·a", sector: "Consumer Social · Seed", ask: 2.0, postCold: 18,
+    tag: "„Die Gen-Z-App für spontane Treffen.“",
+    jockey: ["Junges, energetisches Team", "Erste Gründung, kein Exit", "Hervorragende Selbstvermarktung"],
+    horse: ["2 Mio. Downloads, aber 7-Tage-Retention 4 %", "Kein Monetarisierungsmodell", "Kundenakquisekosten steigen schneller als die Nutzerzahl"],
+    outcomeMult: 0.4,
+    story: "Vanity Metrics: viele Downloads, kaum Bindung. Wuchs ins Leere, Geld verbrannt."
+  },
+  {
+    logo: "L", name: "Lygos Bio", sector: "Biotech / Patente · Seed", ask: 4.0, postCold: 20,
+    tag: "„Enzymatische Produktion von Spezialchemikalien.“",
+    jockey: ["Erfahrenes Wissenschaftler-Team", "Industrie-Advisor an Bord", "Sachlicher, technischer Pitch"],
+    horse: ["3 erteilte Patente, starkes geistiges Eigentum", "Pilotvertrag mit Chemiekonzern", "Langer Horizont, kapitalintensiv"],
+    outcomeMult: 5,
+    story: "Das geistige Eigentum und ein echter Pilotkunde zahlten sich aus. Langsam, aber solider Wertaufbau."
+  },
+  {
+    logo: "V", name: "Volt Mobility", sector: "Hardware / Mobility · Series A", ask: 5.0, postCold: 16,
+    tag: "„E-Scooter-Flotten für Mittelstädte.“",
+    jockey: ["Ex-Automotive-Manager", "Großes Investoren-Netzwerk", "Sehr selbstbewusster Pitch"],
+    horse: ["Hohe Stückkosten, dünne Marge", "Mittelverbrauch (Burn Rate) €600 Tsd./Monat", "Gesättigter, regulierter Markt"],
+    outcomeMult: 0.0,
+    story: "Kapitalintensiv, ruinöser Wettbewerb. Ging der Runway aus — Totalverlust."
+  },
+  {
+    logo: "M", name: "Mira Health", sector: "FemTech · Seed", ask: 2.0, postCold: 12,
+    tag: "„Diagnostik-Plattform für Frauengesundheit.“",
+    jockey: ["Gründerin, Ärztin + Datenwissenschaftlerin", "Erhielt im Pitch v. a. Risiko-Fragen", "Wenig Hype, sachlich"],
+    horse: ["€800 Tsd. wiederkehrender Jahresumsatz, +9 % pro Monat", "Retention 91 %, starke Reviews", "Großer, unterversorgter Markt"],
+    outcomeMult: 7,
+    story: "Starke Traktion, aber oft übersehen/unterbewertet (vgl. Kanze et al. 2018). Wer früh einstieg, wurde belohnt."
+  },
+  {
+    logo: "Q", name: "QuantaLoop", sector: "Quantum / DeepTech · Seed", ask: 4.0, postCold: 22,
+    tag: "„Fehlerkorrektur für Quantenprozessoren.“",
+    jockey: ["Spitzenforscher-Team, Nature-Paper", "Akademisches Prestige", "Visionärer Pitch"],
+    horse: ["Kein Produkt, Technologiereifegrad 3 von 9", "Kein Umsatz, 10+ Jahre Horizont", "Timing völlig offen"],
+    outcomeMult: 1.0,
+    story: "Überlebt, aber kein Exit in Sicht. DeepTech-Timing-Problem: richtig, aber zu früh."
+  },
+  {
+    logo: "S", name: "Snackr", sector: "Lebensmittel-Direktvertrieb · Seed", ask: 1.5, postCold: 10,
+    tag: "„Abo-Box für gesunde Bürosnacks.“",
+    jockey: ["Sympathisches Erstgründer-Team", "Gutes Storytelling", "Kein Skalierungs-Track-Record"],
+    horse: ["+15 % pro Monat, aber 6 % Bruttomarge", "Hoher Wettbewerb, austauschbar", "Wachstum nur mit Marketing-Geld"],
+    outcomeMult: 0.8,
+    story: "Wuchs hübsch, aber Margen zu dünn. Endete als kleiner Acqui-Hire — Geld grob zurück."
+  }
+];
+
+// ---------------- STATE ----------------
+let state = {};
+
+function resetGame() {
+  state = { mode: null, idx: 0, capital: 15, invested: [], timer: null };
+  document.getElementById('hudCap').textContent = '€15.0M';
+  document.getElementById('hudSeen').textContent = '0 / 8';
+  document.getElementById('hudInv').textContent = '0';
+  document.getElementById('hudMode').textContent = 'Setup';
+  document.getElementById('hudMode').className = 'pill';
+  show('intro');
+}
+
+function startGame(mode) {
+  state.mode = mode;
+  state.idx = 0;
+  state.capital = 15;
+  state.invested = [];
+  const hm = document.getElementById('hudMode');
+  hm.textContent = mode === 'hot' ? 'Hot Market' : 'Cold Market';
+  hm.className = 'pill ' + mode;
+  renderDeal();
+  show('deal');
+}
+
+function show(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function updateHud() {
+  document.getElementById('hudCap').textContent = '€' + state.capital.toFixed(1) + 'M';
+  document.getElementById('hudSeen').textContent = state.idx + ' / 8';
+  document.getElementById('hudInv').textContent = state.invested.length;
+}
+
+// ---------------- DEAL RENDERING ----------------
+function renderDeal() {
+  clearTimer();
+  const s = STARTUPS[state.idx];
+  const hot = state.mode === 'hot';
+  const post = hot ? Math.round(s.postCold * 1.5) : s.postCold;
+
+  document.getElementById('dealProgress').textContent = 'Deal ' + (state.idx + 1) + ' / 8';
+  document.getElementById('dLogo').textContent = s.logo;
+  document.getElementById('dName').textContent = s.name;
+  document.getElementById('dSector').textContent = s.sector;
+  document.getElementById('dTag').textContent = s.tag;
+  document.getElementById('dAsk').textContent = '€' + s.ask.toFixed(1) + 'M';
+  document.getElementById('dVal').textContent = '@ €' + post + 'M post-money';
+
+  document.getElementById('dJockey').innerHTML = s.jockey.map(t =>
+    '<div class="sig"><span class="ic">▹</span><span>' + t + '</span></div>').join('');
+  document.getElementById('dHorse').innerHTML = s.horse.map(t =>
+    '<div class="sig"><span class="ic">▹</span><span>' + t + '</span></div>').join('');
+
+  const note = document.getElementById('dMarket');
+  const noteText = document.getElementById('dMarketText');
+  if (hot) {
+    note.className = 'market-note';
+    noteText.innerHTML = 'Hot Market: Bewertung +50 % aufgeheizt. Andere Fonds bieten mit. <b>Entscheide schnell.</b>';
+  } else {
+    note.className = 'market-note cold';
+    noteText.innerHTML = 'Cold Market: faire Bewertung, kein Zeitdruck. Du kannst gründlich prüfen.';
+  }
+
+  // ticket slider bounds
+  const slider = document.getElementById('ticket');
+  const maxTicket = Math.min(5, Math.max(1, state.capital));
+  slider.max = maxTicket;
+  if (parseFloat(slider.value) > maxTicket) slider.value = maxTicket;
+  updateTicket();
+
+  const investBtn = document.getElementById('investBtn');
+  investBtn.disabled = state.capital < 1;
+  investBtn.textContent = state.capital < 1 ? 'Kein Kapital mehr' : 'Investieren';
+
+  updateHud();
+
+  if (hot) startTimer();
+}
+
+function updateTicket() {
+  const v = parseFloat(document.getElementById('ticket').value);
+  document.getElementById('ticketAmt').textContent = '€' + v.toFixed(1) + 'M';
+}
+
+// ---------------- TIMER (Hot market / FOMO) ----------------
+function startTimer() {
+  const wrap = document.getElementById('timerWrap');
+  const fill = document.getElementById('timerFill');
+  const label = document.getElementById('dealTimerLabel');
+  const num = document.getElementById('dealTimer');
+  wrap.style.display = 'block';
+  label.style.display = 'inline';
+  let total = 20, left = 20;
+  num.textContent = left;
+  fill.style.width = '100%';
+  state.timer = setInterval(() => {
+    left -= 0.1;
+    if (left <= 0) {
+      clearTimer();
+      // Zeit abgelaufen = Deal verpasst (FOMO: zu langsam = weg)
+      decide(false, true);
+      return;
+    }
+    fill.style.width = (left / total * 100) + '%';
+    num.textContent = Math.ceil(left);
+  }, 100);
+}
+
+function clearTimer() {
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+  document.getElementById('timerWrap').style.display = 'none';
+  document.getElementById('dealTimerLabel').style.display = 'none';
+}
+
+// ---------------- DECISION ----------------
+function decide(invest, timedOut = false) {
+  clearTimer();
+  const s = STARTUPS[state.idx];
+  if (invest && state.capital >= 1) {
+    const ticket = Math.min(parseFloat(document.getElementById('ticket').value), state.capital);
+    state.capital = Math.round((state.capital - ticket) * 10) / 10;
+    state.invested.push({ idx: state.idx, ticket: ticket });
+  }
+  state.idx++;
+  updateHud();
+  if (state.idx >= STARTUPS.length) {
+    showResults();
+  } else {
+    renderDeal();
+  }
+}
+
+// ---------------- RESULTS ----------------
+function showResults() {
+  clearTimer();
+  const hot = state.mode === 'hot';
+  let deployed = 0, returned = 0;
+
+  const rows = STARTUPS.map((s, i) => {
+    const inv = state.invested.find(x => x.idx === i);
+    if (!inv) return { s, invested: false };
+    const adj = hot ? s.outcomeMult * 0.66 : s.outcomeMult; // FOMO-Aufpreis frisst Return
+    const back = inv.ticket * adj;
+    deployed += inv.ticket;
+    returned += back;
+    return { s, invested: true, ticket: inv.ticket, mult: adj, back };
+  });
+
+  const totalMult = deployed > 0 ? returned / deployed : 0;
+
+  // verdict
+  const mEl = document.getElementById('rMultiple');
+  mEl.textContent = totalMult.toFixed(1) + '×';
+  mEl.className = 'multiple ' + (totalMult >= 3 ? 'win' : totalMult >= 1 ? 'flat' : 'loss');
+
+  let summary;
+  if (deployed === 0) {
+    summary = 'Du hast nichts investiert — null Risiko, null Return. Ein VC, der nie investiert, hat keinen Fonds.';
+  } else if (totalMult >= 5) {
+    summary = 'Top-Quartil. Du hast den Ausreißer erwischt und nicht zu teuer eingekauft. Genau so funktioniert das Power Law.';
+  } else if (totalMult >= 3) {
+    summary = 'Solider Fonds. Mindestens ein Treffer trägt das Portfolio — der Rest darf ruhig floppen.';
+  } else if (totalMult >= 1) {
+    summary = 'Kapital grob erhalten, aber keine echte Rendite. Dir fehlt der eine große Gewinner.';
+  } else {
+    summary = 'Unter Wasser. Entweder den Fonds-Macher verpasst — oder im Hype zu teuer eingekauft.';
+  }
+  document.getElementById('rSummary').textContent = summary;
+
+  // ledger
+  const fmtMult = m => m >= 3 ? 'win' : m >= 1 ? 'flat' : 'loss';
+  let html = '<div class="row head"><div>Startup</div><div>Ticket</div><div>Multiple</div><div>Zurück</div><div>Was wirklich geschah</div></div>';
+  rows.forEach(r => {
+    if (r.invested) {
+      html += '<div class="row">' +
+        '<div class="name">' + r.s.name + '<small>' + r.s.sector.split(' · ')[0] + '</small></div>' +
+        '<div class="mono">€' + r.ticket.toFixed(1) + 'M</div>' +
+        '<div class="mono mult ' + fmtMult(r.mult) + '">' + r.mult.toFixed(1) + '×</div>' +
+        '<div class="mono">€' + r.back.toFixed(1) + 'M</div>' +
+        '<div class="story">' + r.s.story + '</div></div>';
+    } else {
+      html += '<div class="row passed">' +
+        '<div class="name">' + r.s.name + '<small>' + r.s.sector.split(' · ')[0] + '</small></div>' +
+        '<div class="mono">—</div>' +
+        '<div class="mono mult pass">passt</div>' +
+        '<div class="mono">—</div>' +
+        '<div class="story">' + (r.s.outcomeMult >= 3 ? '⚠ Verpasst! ' : '') + r.s.story + '</div></div>';
+    }
+  });
+  document.getElementById('rLedger').innerHTML = html;
+
+  // dynamic lesson text
+  const kettl = state.invested.find(x => STARTUPS[x.idx].name === 'Kettl');
+  const neural = state.invested.find(x => STARTUPS[x.idx].name === 'NeuralForge');
+  document.getElementById('lessonPower').textContent = kettl
+    ? 'Du hast Kettl gebackt — den unsexy Geschäftskunden-Deal mit 28×. Ein einziger Treffer hat deinen ganzen Fonds getragen.'
+    : 'Du hast Kettl verpasst — den unscheinbaren Geschäftskunden-Deal, der 28× machte. Ohne den Ausreißer trägt kein Portfolio.';
+  document.getElementById('lessonHorse').textContent = neural
+    ? 'Du bist auf NeuralForge reingefallen: Star-Team, Buzzword „AI", keine Traktion → 0.2×. Der Jockey allein reicht nicht.'
+    : 'Gut: NeuralForge (Star-Team, kein Umsatz) hast du gepasst. Die starken Business-Signale schlugen den Hype.';
+  document.getElementById('lessonFomo').textContent = hot
+    ? 'Im Hot Market hast du +50 % Bewertung gezahlt — dein Return wurde um ein Drittel gedrückt. FOMO ist teuer.'
+    : 'Du hast im Cold Market gespielt: faire Preise, volle Due Diligence. Spiel nochmal im Hot Market — und vergleiche.';
+
+  show('results');
+}
+
+// init
+resetGame();
+</script>
+</body>
+</html>
