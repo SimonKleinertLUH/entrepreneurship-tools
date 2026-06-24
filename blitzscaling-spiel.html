@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blitzscaling oder Premature Scaling?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  min-height:100vh;
+  background:linear-gradient(170deg,#06101e 0%,#0c1a2e 40%,#112035 100%);
+  font-family:Georgia,'Palatino Linotype',serif;
+  color:#d0dae8;overflow-x:hidden;
+}
+.wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.hidden{display:none!important}
+
+@keyframes slideIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes breathe{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes checkPop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+.fs-btn{
+  position:fixed;top:16px;right:16px;z-index:100;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+  color:#3d5a80;background:rgba(10,20,34,.8);border:1px solid #1e3050;
+  padding:8px 14px;border-radius:6px;cursor:pointer;
+  backdrop-filter:blur(8px);transition:all .3s;
+}
+.fs-btn:hover{color:#8a9bba;border-color:#3a5580}
+
+/* Intro */
+.intro-el{opacity:0;transform:translateY(20px);transition:all .6s ease}
+.intro-el.show{opacity:1;transform:translateY(0)}
+.intro-badge{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#3d5a80;margin-bottom:28px}
+.intro-title{font-family:'Fraunces',Georgia,serif;font-size:46px;font-weight:900;line-height:1.08;color:#fff;margin-bottom:8px}
+.intro-line{width:64px;height:3px;margin:22px 0 28px;background:linear-gradient(90deg,#F39C12,#E74C3C);border-radius:3px;transform:scaleX(0);transform-origin:left;transition:transform .6s ease .15s}
+.intro-line.show{transform:scaleX(1)}
+.intro-desc{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7;color:#6b85a5;max-width:560px;margin-bottom:12px}
+.intro-conditions{font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.8;color:#8a9cb5;margin-bottom:36px;max-width:560px}
+.intro-conditions b{color:#c0cee0}
+.intro-btn{
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,#F39C12,#e0851a,#E74C3C);background-size:200% 200%;
+  border:none;padding:16px 48px;border-radius:8px;cursor:pointer;letter-spacing:.5px;
+  transition:box-shadow .3s,transform .3s;
+}
+.intro-btn.show{animation:shimmer 5s ease infinite}
+.intro-btn:hover{box-shadow:0 8px 36px rgba(243,156,18,.4);transform:translateY(-3px)}
+
+/* Progress */
+.prog{display:flex;gap:5px;margin-bottom:32px}
+.seg{flex:1;height:4px;border-radius:4px;background:#0f1c2e;overflow:hidden}
+.segfill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+.counter{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#3d5a80;margin-bottom:14px}
+.company-name{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:900;color:#fff;margin-bottom:6px}
+.scenario{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;color:#c0cee0;margin-bottom:14px}
+.facts{
+  background:#0a1422;border:1px solid #162236;border-radius:10px;
+  padding:16px 20px;margin-bottom:28px;
+}
+.fact-row{font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.7;color:#8a9cb5;display:flex;gap:10px}
+.fact-row b{color:#c0cee0;font-weight:600}
+.fact-dot{color:#F39C12;flex-shrink:0}
+
+.prompt{font-family:'DM Sans',sans-serif;font-size:13px;color:#3d5a80;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.prompt-dot{width:7px;height:7px;border-radius:50%;background:#F39C12;animation:breathe 2s ease infinite}
+
+/* Choice buttons */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+.choice{
+  background:#0a1422;border:2px solid #162236;border-radius:12px;
+  padding:22px 20px;cursor:pointer;text-align:center;
+  font-family:'DM Sans',sans-serif;transition:all .25s;
+}
+.choice:hover:not(.locked){transform:translateY(-3px)}
+.choice.locked{cursor:default}
+.choice-blitz:hover:not(.locked){border-color:#2ECC71;background:rgba(46,204,113,.06)}
+.choice-prem:hover:not(.locked){border-color:#E74C3C;background:rgba(231,76,60,.06)}
+.choice-icon{font-size:26px;margin-bottom:8px}
+.choice-title{font-size:16px;font-weight:700;color:#e8edf4;margin-bottom:4px}
+.choice-sub{font-size:12px;color:#6b85a5;line-height:1.4}
+
+/* Reveal */
+.reveal{margin-top:8px}
+.verdict-banner{
+  border-radius:12px;padding:18px 24px;margin-bottom:18px;
+  display:flex;align-items:center;gap:14px;animation:popIn .4s ease;
+}
+.verdict-blitz{background:linear-gradient(135deg,rgba(46,204,113,.15),rgba(46,204,113,.04));border:1.5px solid rgba(46,204,113,.3)}
+.verdict-prem{background:linear-gradient(135deg,rgba(231,76,60,.15),rgba(231,76,60,.04));border:1.5px solid rgba(231,76,60,.3)}
+.verdict-icon{font-size:30px}
+.verdict-text{font-family:'Fraunces',Georgia,serif;font-size:22px;font-weight:900}
+.verdict-blitz .verdict-text{color:#2ECC71}
+.verdict-prem .verdict-text{color:#E74C3C}
+.your-answer{font-family:'DM Sans',sans-serif;font-size:12px;color:#6b85a5;margin-left:auto;text-align:right}
+
+/* Condition checklist */
+.conditions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.cond{
+  background:#0a1422;border:1px solid #162236;border-radius:8px;
+  padding:12px 14px;display:flex;align-items:center;gap:10px;
+  font-family:'DM Sans',sans-serif;font-size:13.5px;opacity:0;
+}
+.cond.show{animation:slideIn .4s ease forwards}
+.cond-mark{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;animation:checkPop .4s ease;
+}
+.cond-yes .cond-mark{background:rgba(46,204,113,.2);color:#2ECC71}
+.cond-no .cond-mark{background:rgba(231,76,60,.2);color:#E74C3C}
+.cond-label{color:#c0cee0;font-weight:600;line-height:1.3}
+
+.explanation{
+  background:#0a1422;border:1px solid #162236;border-radius:10px;
+  padding:18px 22px;font-family:'DM Sans',sans-serif;font-size:14px;
+  line-height:1.65;color:#8a9cb5;margin-bottom:20px;opacity:0;
+}
+.explanation.show{animation:slideIn .4s ease forwards}
+.explanation b{color:#c0cee0}
+
+.btn{
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  padding:13px 32px;border:none;border-radius:8px;cursor:pointer;
+  transition:all .3s;letter-spacing:.3px;
+}
+.btn-next{background:#4A6FA5;color:#fff;float:right;opacity:0}
+.btn-next.show{animation:slideIn .4s ease forwards}
+.btn-next:hover{background:#5680b8;transform:translateY(-2px);box-shadow:0 6px 24px rgba(74,111,165,.35)}
+
+/* Result */
+.res-title{font-family:'Fraunces',Georgia,serif;font-size:38px;font-weight:900;color:#fff;margin:0 0 6px;opacity:0}
+.res-title.show{animation:slideIn .5s ease forwards}
+.res-sub{font-family:'DM Sans',sans-serif;font-size:15px;color:#6b85a5;margin-bottom:32px;opacity:0}
+.res-sub.show{animation:slideIn .5s ease .1s forwards}
+.takeaway{
+  background:#0a1422;border:1px solid #162236;border-radius:10px;
+  padding:20px 24px;margin-bottom:14px;font-family:'DM Sans',sans-serif;
+  font-size:14.5px;line-height:1.6;color:#8a9cb5;opacity:0;
+}
+.takeaway.show{animation:slideIn .5s ease forwards}
+.takeaway b{color:#c0cee0;font-weight:700}
+.restart-btn{
+  margin-top:24px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  color:#3d5a80;background:transparent;border:1px solid #1e3050;
+  padding:11px 24px;border-radius:8px;cursor:pointer;transition:all .3s;opacity:0;
+}
+.restart-btn.show{animation:slideIn .5s ease 1s forwards}
+.restart-btn:hover{color:#7b8faa;border-color:#3a5580;background:#0d1825}
+
+@media(max-width:600px){
+  .choices{grid-template-columns:1fr}
+  .conditions-grid{grid-template-columns:1fr}
+  .intro-title{font-size:34px}
+}
+</style>
+</head>
+<body>
+
+<button class="fs-btn" onclick="toggleFS()">Vollbild</button>
+
+<div class="wrap">
+  <div id="intro">
+    <div class="intro-badge intro-el" id="a1">Vorlesung 10 &mdash; Interaktive &Uuml;bung</div>
+    <h1 class="intro-title intro-el" id="a2">Blitzscaling<br>oder Premature Scaling?</h1>
+    <div class="intro-line intro-el" id="a3"></div>
+    <p class="intro-desc intro-el" id="a4">Sechs Startups skalieren schnell, fr&uuml;h und aggressiv. Dasselbe Tempo &mdash; aber war es ein genialer Schachzug oder ein t&ouml;dlicher Fehler? Entscheidet anhand der Bedingungen.</p>
+    <div class="intro-conditions intro-el" id="a5">
+      Blitzscaling ist nur dann gerechtfertigt, wenn die Bedingungen stimmen:<br>
+      <b>&#10003; Gesch&auml;ftsmodell validiert</b> (Product-Market-Fit)&nbsp;&nbsp;
+      <b>&#10003; Netzwerkeffekte</b>&nbsp;&nbsp;
+      <b>&#10003; Winner-takes-all-Markt</b>&nbsp;&nbsp;
+      <b>&#10003; Kapital vorhanden</b>
+    </div>
+    <button class="intro-btn intro-el" id="a6" onclick="start()">Spiel starten &rarr;</button>
+  </div>
+
+  <div id="game" class="hidden"></div>
+  <div id="result" class="hidden"></div>
+</div>
+
+<script>
+var DATA = [
+  {
+    name: "RideNow",
+    scenario: "Ein Mitfahr-Dienst expandiert in 12 Monaten von 3 auf 40 St\u00E4dte, verbrennt bewusst Millionen an Subventionen f\u00FCr Fahrer und Kunden.",
+    facts: [
+      "In den ersten 3 St\u00E4dten profitabel pro Fahrt \u2014 das Modell tr\u00E4gt.",
+      "Starke Netzwerkeffekte: mehr Fahrer \u2192 k\u00FCrzere Wartezeit \u2192 mehr Kunden.",
+      "Markt tendiert zu einem dominanten Anbieter pro Region.",
+      "200 Mio. $ frisch eingesammelt, ein Konkurrent dr\u00E4ngt in den Markt."
+    ],
+    cond: { pmf: true, network: true, wta: true, capital: true },
+    verdict: "blitz",
+    explanation: "<b>Alle vier Bedingungen erf\u00FCllt.</b> Das Modell ist validiert, es gibt starke Netzwerkeffekte in einem Winner-takes-all-Markt, und das Kapital ist da. Hier zahlt sich Tempo aus: Wer zuerst kritische Masse erreicht, baut einen Vorsprung auf, den Wettbewerber kaum aufholen."
+  },
+  {
+    name: "FreshPlate",
+    scenario: "Ein Kochbox-Startup stellt nach 6 Monaten 50 Vertriebsleute ein und launcht gleichzeitig in 5 L\u00E4ndern.",
+    facts: [
+      "60 % der Kunden k\u00FCndigen schon im zweiten Monat \u2014 kein Product-Market-Fit.",
+      "Keine Netzwerkeffekte: Der Wert h\u00E4ngt nicht von anderen Nutzern ab.",
+      "Markt fragmentiert, viele Anbieter koexistieren.",
+      "Gut finanziert durch eine gro\u00DFe Runde."
+    ],
+    cond: { pmf: false, network: false, wta: false, capital: true },
+    verdict: "prem",
+    explanation: "<b>Premature Scaling.</b> Der t\u00F6dliche Fehler ist der fehlende Product-Market-Fit. Aggressives Skalieren auf ein nicht validiertes Modell vervielfacht nur das Leck \u2014 jeder neue Kunde wandert wieder ab. Kapital kauft Tempo, aber keinen PMF."
+  },
+  {
+    name: "CollabHub",
+    scenario: "Eine Team-Software w\u00E4chst rasant: aggressives Hiring, internationale Expansion, hohe Marketingausgaben innerhalb eines Jahres.",
+    facts: [
+      "130 % Netto-Umsatzbindung \u2014 Kunden bleiben und zahlen mehr. PMF klar da.",
+      "Virale Verbreitung: Teams laden weitere Teams ein.",
+      "Winner-takes-most-Kategorie \u2014 Standardisierung beg\u00FCnstigt einen F\u00FChrer.",
+      "100 Mio. $ Finanzierung gesichert."
+    ],
+    cond: { pmf: true, network: true, wta: true, capital: true },
+    verdict: "blitz",
+    explanation: "<b>Blitzscaling gerechtfertigt.</b> Validiertes Modell, virale Netzwerkeffekte, eine Winner-takes-most-Kategorie und ausreichend Kapital. Genau das Profil, bei dem bewusste Ineffizienz sinnvoll ist, um den Markt schneller zu besetzen als die Konkurrenz."
+  },
+  {
+    name: "ViralSnap",
+    scenario: "Eine Social-App explodiert: Millionen Downloads in Wochen. Das Team skaliert Server, Personal und Marketing so schnell es geht.",
+    facts: [
+      "Hohe Nutzerbindung und Engagement \u2014 das Produkt funktioniert.",
+      "Klare Netzwerkeffekte: mehr Freunde auf der App = mehr Wert.",
+      "Winner-takes-all-Dynamik bei sozialen Netzwerken.",
+      "Aber: nur noch 6 Monate Runway, keine n\u00E4chste Runde zugesagt."
+    ],
+    cond: { pmf: true, network: true, wta: true, capital: false },
+    verdict: "prem",
+    explanation: "<b>Riskant \u2014 effektiv Premature Scaling.</b> Drei Bedingungen stimmen, aber das fehlende Kapital ist der Knackpunkt. Ohne solide Finanzierungsbasis wird aus Blitzscaling schnell unkontrolliertes Wachstum: Wenn die n\u00E4chste Runde ausbleibt, kollabiert die teure Infrastruktur mitten im Hyperwachstum."
+  },
+  {
+    name: "Brot & Co",
+    scenario: "Eine Bio-B\u00E4ckerei-Kette expandiert auf Kredit von 2 auf 20 Filialen in einem Jahr.",
+    facts: [
+      "Das Konzept funktioniert \u2014 die ersten Filialen sind profitabel.",
+      "Keine Netzwerkeffekte: Eine neue Filiale macht die anderen nicht wertvoller.",
+      "Kein Winner-takes-all \u2014 lokale B\u00E4ckereien koexistieren problemlos.",
+      "Finanziert \u00FCber teure Bankkredite, d\u00FCnne Kapitaldecke."
+    ],
+    cond: { pmf: true, network: false, wta: false, capital: false },
+    verdict: "prem",
+    explanation: "<b>Premature Scaling.</b> Das Modell ist zwar validiert, aber es fehlen Netzwerkeffekte und Winner-takes-all-Dynamik \u2014 Tempo schafft hier keinen verteidigbaren Vorsprung. Ohne diese Bedingungen ist schnelles Skalieren nur teuer, nicht strategisch. Proportionales Wachstum w\u00E4re tragf\u00E4higer."
+  },
+  {
+    name: "VertiSoft",
+    scenario: "Ein Nischen-Software-Anbieter f\u00FCr Zahnarztpraxen verbrennt Kapital, um in einem Jahr m\u00F6glichst viele Praxen zu gewinnen.",
+    facts: [
+      "Solides, profitables Modell \u2014 PMF eindeutig vorhanden.",
+      "Keine Netzwerkeffekte zwischen den Praxen.",
+      "Kleiner, fragmentierter Markt ohne Winner-takes-all-Logik.",
+      "Gut kapitalisiert durch einen strategischen Investor."
+    ],
+    cond: { pmf: true, network: false, wta: false, capital: true },
+    verdict: "prem",
+    explanation: "<b>Premature Scaling \u2014 oder zumindest unn\u00F6tig.</b> PMF und Kapital sind da, aber ohne Netzwerkeffekte und Winner-takes-all-Markt bringt das hohe Tempo keinen strukturellen Vorteil. Blitzscaling akzeptiert Ineffizienz nur, weil Geschwindigkeit einen Vorsprung schafft \u2014 fehlt dieser Mechanismus, verbrennt man Geld ohne Gegenwert."
+  }
+];
+
+var CONDS = [
+  { key: "pmf", label: "Gesch\u00E4ftsmodell validiert (PMF)" },
+  { key: "network", label: "Netzwerkeffekte" },
+  { key: "wta", label: "Winner-takes-all-Markt" },
+  { key: "capital", label: "Kapital vorhanden" }
+];
+
+var cur = 0, answers = [], revealed = false;
+
+setTimeout(function(){document.getElementById("a1").classList.add("show")},150);
+setTimeout(function(){document.getElementById("a2").classList.add("show");document.getElementById("a3").classList.add("show")},400);
+setTimeout(function(){document.getElementById("a4").classList.add("show");document.getElementById("a5").classList.add("show")},650);
+setTimeout(function(){document.getElementById("a6").classList.add("show")},900);
+
+function start(){
+  var intro=document.getElementById("intro");
+  intro.style.transition="opacity .4s,transform .4s";
+  intro.style.opacity="0";intro.style.transform="translateY(-20px)";
+  setTimeout(function(){
+    intro.classList.add("hidden");
+    cur=0;answers=[];revealed=false;
+    document.getElementById("game").classList.remove("hidden");
+    build();
+  },420);
+}
+
+function build(){
+  var d=DATA[cur];
+  revealed=false;
+  var g=document.getElementById("game");
+  var h="";
+
+  h+='<div class="prog">';
+  for(var i=0;i<DATA.length;i++){
+    var w=i<cur?"100%":(i===cur?"50%":"0%");
+    var c=i<cur?"#4A6FA5":"#F39C12";
+    h+='<div class="seg"><div class="segfill" style="width:'+w+';background:'+c+'"></div></div>';
+  }
+  h+='</div>';
+
+  h+='<div class="counter" style="animation:slideIn .4s ease">Fall '+(cur+1)+' / '+DATA.length+'</div>';
+  h+='<div class="company-name" style="animation:slideIn .45s ease .05s both">'+d.name+'</div>';
+  h+='<div class="scenario" style="animation:slideIn .5s ease .1s both">'+d.scenario+'</div>';
+
+  h+='<div class="facts" style="animation:slideIn .5s ease .15s both">';
+  for(var i=0;i<d.facts.length;i++){
+    h+='<div class="fact-row"><span class="fact-dot">\u25B8</span><span>'+d.facts[i]+'</span></div>';
+  }
+  h+='</div>';
+
+  h+='<div class="prompt" id="prompt" style="animation:slideIn .4s ease .2s both"><span class="prompt-dot"></span> Euer Urteil?</div>';
+
+  h+='<div class="choices" id="choices">';
+  h+='<div class="choice choice-blitz" onclick="choose(\'blitz\')"><div class="choice-icon">\u26A1</div><div class="choice-title">Blitzscaling</div><div class="choice-sub">Bedingungen erf\u00FCllt \u2014 Tempo schafft Vorsprung</div></div>';
+  h+='<div class="choice choice-prem" onclick="choose(\'prem\')"><div class="choice-icon">\u26A0\uFE0F</div><div class="choice-title">Premature Scaling</div><div class="choice-sub">Fundament fehlt \u2014 Tempo verst\u00E4rkt Schw\u00E4chen</div></div>';
+  h+='</div>';
+
+  h+='<div id="reveal"></div>';
+
+  g.innerHTML=h;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function choose(choice){
+  if(revealed)return;
+  revealed=true;
+  var d=DATA[cur];
+  answers.push(choice===d.verdict);
+
+  document.querySelectorAll(".choice").forEach(function(c){c.classList.add("locked")});
+  var prompt=document.getElementById("prompt");
+  if(prompt)prompt.style.display="none";
+  document.getElementById("choices").style.display="none";
+
+  var correct = (choice===d.verdict);
+  var vClass = d.verdict==="blitz"?"verdict-blitz":"verdict-prem";
+  var vIcon = d.verdict==="blitz"?"\u26A1":"\u26A0\uFE0F";
+  var vText = d.verdict==="blitz"?"Blitzscaling":"Premature Scaling";
+  var yourTxt = correct ? "\u2713 Eure Wahl war richtig" : "\u2717 Eure Wahl: "+(choice==="blitz"?"Blitzscaling":"Premature Scaling");
+
+  var h='<div class="reveal">';
+  h+='<div class="verdict-banner '+vClass+'"><div class="verdict-icon">'+vIcon+'</div><div class="verdict-text">'+vText+'</div><div class="your-answer">'+yourTxt+'</div></div>';
+
+  h+='<div class="conditions-grid">';
+  for(var i=0;i<CONDS.length;i++){
+    var met=d.cond[CONDS[i].key];
+    var cc=met?"cond-yes":"cond-no";
+    var mk=met?"\u2713":"\u2717";
+    h+='<div class="cond '+cc+'" id="cond'+i+'"><div class="cond-mark">'+mk+'</div><div class="cond-label">'+CONDS[i].label+'</div></div>';
+  }
+  h+='</div>';
+
+  h+='<div class="explanation" id="expl">'+d.explanation+'</div>';
+
+  var lbl=cur<DATA.length-1?"N\u00E4chster Fall \u2192":"Ergebnis \u2192";
+  h+='<button class="btn btn-next" id="nextBtn" onclick="next()">'+lbl+'</button>';
+  h+='<div style="clear:both"></div></div>';
+
+  document.getElementById("reveal").innerHTML=h;
+
+  for(var i=0;i<CONDS.length;i++){
+    (function(idx){setTimeout(function(){document.getElementById("cond"+idx).classList.add("show")},150+idx*150)})(i);
+  }
+  setTimeout(function(){document.getElementById("expl").classList.add("show")},150+CONDS.length*150);
+  setTimeout(function(){document.getElementById("nextBtn").classList.add("show")},400+CONDS.length*150);
+}
+
+function next(){
+  var g=document.getElementById("game");
+  g.style.transition="opacity .3s,transform .3s";
+  g.style.opacity="0";g.style.transform="translateY(-16px)";
+  setTimeout(function(){
+    g.style.opacity="1";g.style.transform="translateY(0)";
+    if(cur<DATA.length-1){cur++;build();}
+    else{g.classList.add("hidden");showResult();}
+  },340);
+}
+
+function showResult(){
+  var rs=document.getElementById("result");
+  rs.classList.remove("hidden");
+  var correct=answers.filter(function(a){return a}).length;
+
+  var h='';
+  h+='<h2 class="res-title" id="r1">'+correct+' / '+DATA.length+' richtig</h2>';
+  h+='<p class="res-sub" id="r2">Was diese F\u00E4lle gemeinsam zeigen:</p>';
+
+  h+='<div class="takeaway" id="t1"><b>Dasselbe Tempo, gegens\u00E4tzliche Ergebnisse.</b> Blitzscaling und Premature Scaling sehen identisch aus \u2014 schnell, fr\u00FCh, aggressiv. Es entscheiden allein die Bedingungen.</div>';
+  h+='<div class="takeaway" id="t2"><b>Kein PMF = sicheres Premature Scaling.</b> Ohne validiertes Gesch\u00E4ftsmodell vervielfacht Skalierung nur die Schw\u00E4chen. Kapital kauft Tempo, nicht Product-Market-Fit.</div>';
+  h+='<div class="takeaway" id="t3"><b>Ohne Netzwerkeffekte und Winner-takes-all bringt Tempo keinen Vorsprung.</b> Blitzscaling akzeptiert Ineffizienz nur, weil Geschwindigkeit einen verteidigbaren Vorsprung schafft. Fehlt dieser Mechanismus, verbrennt man nur Geld.</div>';
+  h+='<div class="takeaway" id="t4"><b>Auch unter idealen Bedingungen bleibt es eine Wette.</b> Kapital kauft Tempo, aber nicht die Kapazit\u00E4t, Wachstum zu organisieren (Penrose).</div>';
+
+  h+='<button class="restart-btn" id="rb" onclick="restart()">\u21BA Nochmal spielen</button>';
+
+  rs.innerHTML=h;
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  setTimeout(function(){document.getElementById("r1").classList.add("show");document.getElementById("r2").classList.add("show")},100);
+  setTimeout(function(){document.getElementById("t1").classList.add("show")},300);
+  setTimeout(function(){document.getElementById("t2").classList.add("show")},450);
+  setTimeout(function(){document.getElementById("t3").classList.add("show")},600);
+  setTimeout(function(){document.getElementById("t4").classList.add("show")},750);
+  setTimeout(function(){document.getElementById("rb").classList.add("show")},1000);
+}
+
+function restart(){
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("result").innerHTML="";
+  cur=0;answers=[];revealed=false;
+  document.getElementById("game").classList.remove("hidden");
+  build();
+}
+
+function toggleFS(){
+  if(!document.fullscreenElement){document.documentElement.requestFullscreen();document.querySelector(".fs-btn").textContent="Vollbild beenden";}
+  else{document.exitFullscreen();document.querySelector(".fs-btn").textContent="Vollbild";}
+}
+</script>
+</body>
+</html>
